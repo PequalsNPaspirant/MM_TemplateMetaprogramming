@@ -8,8 +8,10 @@
 using namespace mm;
 
 namespace mm {
-	MM_DEFINE_FLAG(false, TemplateMetaProgrammingBasicSyntax)
-	MM_DEFINE_FLAG(false, TemplateMetaProgramming_tuple)
+
+	MM_DEFINE_FLAG(false, TemplateMetaProgrammingBasicSyntax);
+	MM_DEFINE_FLAG(false, TemplateMetaProgramming_tuple);
+	MM_DEFINE_FLAG(true, TMP_unique_ptr_polymorphism);
 }
 
 int main(int argc, char* argv[])
