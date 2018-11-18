@@ -1,0 +1,19 @@
+
+obj/windows_gcc/MM_TemplateMetaprogramming_main.o: src/MM_TemplateMetaprogramming_main.cpp \
+ ../MM_CommonUtils/src/WindowsUtils/WindowsUtils.h \
+ ../MM_CommonUtils/src/Timer/Timer.h \
+ ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h
+
+obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_basics.o: src/TemplateMetaprogramming/TemplateMetaProgramming_basics.cpp \
+ src/TemplateMetaprogramming/TemplateMetaProgramming_basics.h \
+ ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h
+
+obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_forward.o: src/TemplateMetaprogramming/TemplateMetaProgramming_forward.cpp
+
+obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_tuple.o: src/TemplateMetaprogramming/TemplateMetaProgramming_tuple.cpp \
+ src/TemplateMetaprogramming/TemplateMetaProgramming_tuple.h \
+ ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h
+
+obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_using.o: src/TemplateMetaprogramming/TemplateMetaProgramming_using.cpp
+
+obj/windows_gcc/Templates/Templates.o: src/Templates/Templates.cpp
