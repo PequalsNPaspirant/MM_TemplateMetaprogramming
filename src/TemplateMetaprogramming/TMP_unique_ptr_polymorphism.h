@@ -8,7 +8,7 @@ namespace mm {
 	{
 	public:
 		~A() {
-			std::cout << "A::~A()" << std::endl;
+			std::cout << "\nA::~A()";
 		}
 	};
 
@@ -17,7 +17,20 @@ namespace mm {
 	public:
 		~BA() 
 		{
-			std::cout << "BA::~BA()" << std::endl;
+			std::cout << "\nBA::~BA()";
+		}
+	};
+
+	class CBA : public BA 
+	{
+	public:
+		CBA() 
+		{
+			std::cout << "\nCBA::CBA()";
+		}
+		~CBA() 
+		{
+			std::cout << "\nCBA::~CBA()";
 		}
 	};
 
@@ -26,33 +39,45 @@ namespace mm {
 		char filler[16];
 	};
 
-	class CBA : private Filler, public BA 
+	class CBAF : public BA, private Filler
 	{
 	public:
-		CBA() 
+		CBAF() 
 		{
-			std::cout << "CBA::CBA()" << std::endl;
+			std::cout << "\nCBAF::CBAF()";
 		}
-		~CBA() 
+		~CBAF() 
 		{
-			std::cout << "CBA::~CBA()" << std::endl;
+			std::cout << "\nCBAF::~CBAF()";
 		}
 	};
 
 
-
-	template<typename T> struct Deleter 
+	class FCBA : private Filler, public BA 
 	{
-		Deleter()
-			: fun(funDeleter<T>)
+	public:
+		FCBA() 
+		{
+			std::cout << "\nFCBA::FCBA()";
+		}
+		~FCBA() 
+		{
+			std::cout << "\nFCBA::~FCBA()";
+		}
+	};
+
+	template<typename T> 
+	struct Deleter_v1
+	{
+		Deleter_v1()
+			: fun(Deleter_v1::funDeleter<T>)
 		{
 
 		}
 		template <typename C>
-		Deleter(Deleter<C>&& obj)
+		Deleter_v1(Deleter_v1<C>&& obj)
 			: fun(obj.fun)
 		{
-
 		}
 		void operator()(T* obj)
 		{
@@ -69,4 +94,65 @@ namespace mm {
 		fPtr fun;
 	};
 
+	
+	struct ControlBlockBase
+	{
+		virtual void destroy(void* obj) = 0;
+		virtual ~ControlBlockBase() = default;
+	};
+
+	template<typename T>
+	struct ControlBlock : public ControlBlockBase
+	{
+		ControlBlock()
+			: fun(ControlBlock::funDeleter)
+		{
+		}
+
+		~ControlBlock()
+		{
+
+		}
+
+		void destroy(void* obj) override
+		{
+			(*fun)(static_cast<T*>(obj));
+		}
+
+		static void funDeleter(T* obj)
+		{
+			delete obj;
+		}
+
+		typedef void(*fPtr)(T*);
+		fPtr fun;
+	};
+
+	template<typename T> 
+	struct Deleter_v2
+	{
+		Deleter_v2()
+			: pObj_(new ControlBlock<T>())
+		{
+
+		}
+		~Deleter_v2()
+		{
+			delete pObj_;
+		}
+
+		template <typename C>
+		Deleter_v2(Deleter_v2<C>&& obj)
+			: pObj_(obj.pObj_)
+		{
+			obj.pObj_ = nullptr;
+		}
+		void operator()(T* obj)
+		{
+			pObj_->destroy(obj);
+		}
+
+		ControlBlockBase* pObj_;
+	};
+	
 }

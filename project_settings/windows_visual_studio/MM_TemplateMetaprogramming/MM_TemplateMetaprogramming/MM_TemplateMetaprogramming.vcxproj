@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_forward.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_using.cpp" />
@@ -28,6 +29,7 @@
     <ClCompile Include="..\..\..\..\src\MM_TemplateMetaprogramming_main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_tuple.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_basics.h" />

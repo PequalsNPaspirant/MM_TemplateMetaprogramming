@@ -16,4 +16,9 @@ obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_tuple.o: src/Tem
 
 obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_using.o: src/TemplateMetaprogramming/TemplateMetaProgramming_using.cpp
 
+obj/windows_gcc/TemplateMetaprogramming/TMP_unique_ptr_polymorphism.o: src/TemplateMetaprogramming/TMP_unique_ptr_polymorphism.cpp \
+ src/TemplateMetaprogramming/TMP_unique_ptr_polymorphism.h \
+ ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h \
+ ../MM_CommonUtils/src/Assert/MyAssert.h
+
 obj/windows_gcc/Templates/Templates.o: src/Templates/Templates.cpp

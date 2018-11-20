@@ -27,24 +27,24 @@ namespace mm {
 		template<size_t index> 
 		struct elementType
 		{
-			typedef typename tuple<Ts...>::elementType<index - 1>::type type;
+			typedef typename tuple<Ts...>::template elementType<index - 1>::type type;
 		};
 
 		template<>
-		struct elementType<0>
+		struct elementType<size_t(0)>
 		{
 			typedef T type;
 		};
 
 		template<size_t index>
-		typename tuple<T, Ts...>::elementType<index>::type getAt(void)
+		typename tuple<T, Ts...>::template elementType<index>::type getAt(void)
 		//auto getAt()
 		{ 
 			return static_cast<tuple<Ts...>>(*this).getAt<index - 1>();
 		}
 
 		template<>
-		typename tuple<T, Ts...>::elementType<0>::type  getAt<0>(void)
+		typename tuple<T, Ts...>::template elementType<0>::type  getAt<0>(void)
 		{
 			return tail;
 		}

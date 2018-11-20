@@ -11,10 +11,10 @@ LIBNAME := libMM_CommonUtils.a
 LDLIBS := MM_CommonUtils
 LDFLAGS := -static -L$(LIBPATH) -l$(LDLIBS)
 
-CXX := g++-7.1.0
-CXXFLAGS_DEBUG := -Wall -g -m64 -std=c++1y
-CXXFLAGS_WARN := -Wall -m64 -std=c++1y
-CXXFLAGS_NO_WARN := -m64 -std=c++1y
+CXX := g++-curent
+CXXFLAGS_DEBUG := -Wall -g -m64 -std=c++17
+CXXFLAGS_WARN := -Wall -m64 -std=c++17
+CXXFLAGS_NO_WARN := -m64 -std=c++17
 CXXFLAGS := $(CXXFLAGS_NO_WARN)
 
 SRCFILES := $(shell find $(SRCDIR) -name "*.cpp")
