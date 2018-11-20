@@ -185,25 +185,26 @@ namespace mm{
 	//------------------------------------------------------------------
 
 	template <typename Base>
-	static constexpr std::true_type checkIfUpcastingImplicit(const volatile Base*);
+	static std::true_type checkIfUpcastingImplicit(const volatile Base*);
 	template <typename Base>
-	static constexpr std::false_type checkIfUpcastingImplicit(const volatile void*);
+	static std::false_type checkIfUpcastingImplicit(const volatile void*);
 
 	template <typename Base, typename Derived>
-	using MM_is_base_of_decltype = decltype(checkIfUpcastingImplicit<Base>(std::declval<Derived*>()));
+	using MM_is_base_of_helper = decltype(checkIfUpcastingImplicit<Base>(std::declval<Derived*>()));
 
 	template <typename Base, typename Derived, typename = void>
-	struct MM_is_base_of_helper : public std::true_type
+	struct MM_is_base_of : public std::true_type
 	{ };
 
 	template <typename Base, typename Derived>
-	struct MM_is_base_of_helper<Base, Derived, std::void_t<MM_is_base_of_decltype<Base, Derived>>> : public MM_is_base_of_decltype<Base, Derived>
+	struct MM_is_base_of<Base, Derived, std::void_t<MM_is_base_of_helper<Base, Derived>>>
+		: public MM_is_base_of_helper<Base, Derived>
 	{ };
 
-	template<typename B, typename D>
-	struct MM_is_base_of : MM_is_base_of_helper<B, D>
-	{
-	};
+	//template<typename B, typename D>
+	//struct MM_is_base_of : public MM_is_base_of_helper<B, D>
+	//{
+	//};
 
 	//define constexpr global const object for value
 	template<typename B, typename D>
@@ -241,6 +242,10 @@ namespace mm{
 		{
 		};
 
+		class Different
+		{
+		};
+
 		static_assert(MM_is_base_of<int, Base>::value == false, "");
 		static_assert(MM_is_base_of_v<int, Base> == false, "");
 		static_assert(MM_is_base_of<Base, PublicDerived>::value == true, "");
@@ -249,6 +254,7 @@ namespace mm{
 		static_assert(MM_is_base_of<Base, DD>::value == true, ""); //Base is ambiguos base class of DD
 		static_assert(MM_is_base_of<ProtectedDerived, MultiDerived>::value == true, "");
 		static_assert(MM_is_base_of<Base, MultiDerived>::value == true, ""); //Base is ambiguos base class of MultiDerived
+		static_assert(MM_is_base_of<Base, Different>::value == false, "");
 	}
 
 	//------------------------------------------------------------------
