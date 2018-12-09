@@ -184,27 +184,7 @@ namespace mm{
 
 	//------------------------------------------------------------------
 
-	template <typename Base>
-	static std::true_type checkIfUpcastingImplicit_1(const volatile Base*);
-	template <typename Base>
-	static std::false_type checkIfUpcastingImplicit_1(const volatile void*);
-
-	template <typename Base, typename Derived>
-	using MM_is_base_of_helper_1 = decltype(checkIfUpcastingImplicit_1<Base>(std::declval<Derived*>()));
-
-	template <typename Base, typename Derived, typename = void>
-	struct MM_is_base_of_1 : public std::true_type
-	{ };
-
-	template <typename Base, typename Derived>
-	struct MM_is_base_of_1<Base, Derived, std::void_t<MM_is_base_of_helper_1<Base, Derived>>>
-		: public MM_is_base_of_helper_1<Base, Derived>
-	{ };
-
-	//define constexpr global const object for value
-	template<typename B, typename D>
-	constexpr const bool MM_is_base_of_1_v = MM_is_base_of_1<B, D>::value;
-
+	//Test data
 	class Base
 	{
 	};
@@ -239,25 +219,129 @@ namespace mm{
 	{
 	};
 
+	//Approach 1
+
+	//version A
+	template <typename Base>
+	static std::true_type checkIfUpcastingImplicit_1(const volatile Base*);
+	//version B : overloaded template function
+	template <typename Base>
+	static std::false_type checkIfUpcastingImplicit_1(const volatile void*);
+
+	template <typename Base, typename Derived>
+	using MM_is_base_of_helper_1 = decltype(checkIfUpcastingImplicit_1<Base>(std::declval<Derived*>()));
+
+	//version 1 : template definition
+	template <typename Base, typename Derived, typename = void>
+	struct MM_is_base_of_1 : public std::true_type
+	{ };
+
+	//version 2: template partial specialization
+	template <typename Base, typename Derived>
+	struct MM_is_base_of_1<Base, Derived, std::void_t<MM_is_base_of_helper_1<Base, Derived>>>
+		: public MM_is_base_of_helper_1<Base, Derived>
+	{ };
+
+	//define constexpr global const object for value
+	template<typename B, typename D>
+	constexpr const bool MM_is_base_of_1_v = MM_is_base_of_1<B, D>::value;
+
 	void test_MM_is_base_of_1()
 	{
+		//calls version 2-B
 		static_assert(MM_is_base_of_1_v<int, Base> == false, "");
-		static_assert(MM_is_base_of_1_v<int, Base> == false, "");
+		static_assert(MM_is_base_of_1_v<int, string> == false, "");
+		static_assert(MM_is_base_of_1_v<Base, Different> == false, "");
+
+		//calls version 2-A
 		static_assert(MM_is_base_of_1_v<Base, PublicDerived> == true, "");
+
+		//calls version 1
 		static_assert(MM_is_base_of_1_v<Base, ProtectedDerived> == true, "");
 		static_assert(MM_is_base_of_1_v<Base, PrivateDerived> == true, "");
 		static_assert(MM_is_base_of_1_v<Base, DD> == true, ""); //Base is ambiguos base class of DD
 		static_assert(MM_is_base_of_1_v<ProtectedDerived, MultiDerived> == true, "");
 		static_assert(MM_is_base_of_1_v<Base, MultiDerived> == true, ""); //Base is ambiguos base class of MultiDerived
-		static_assert(MM_is_base_of_1_v<Base, Different> == false, "");
+
+		//auto retVal1 = checkIfUpcastingImplicit_1<int>(std::declval<Base*>());
+		//auto retVal2 = checkIfUpcastingImplicit_1<int>(std::declval<string*>());
+		//auto retVal3 = checkIfUpcastingImplicit_1<Base>(std::declval<Different*>());
+
+		//auto retVal4 = checkIfUpcastingImplicit_1<Base>(std::declval<PublicDerived*>());
+
+		//auto retVal5 = checkIfUpcastingImplicit_1<Base>(std::declval<ProtectedDerived*>());
+		//auto retVal6 = checkIfUpcastingImplicit_1<Base>(std::declval<PrivateDerived*>());
+		//auto retVal7 = checkIfUpcastingImplicit_1<Base>(std::declval<DD*>());
+		//auto retVal8 = checkIfUpcastingImplicit_1<ProtectedDerived>(std::declval<MultiDerived*>());
+		//auto retVal9 = checkIfUpcastingImplicit_1<Base>(std::declval<MultiDerived*>());
 	}
+
+	/*
+	//Approach 2
+
+	template <typename Base>
+	struct checkIfUpcastingImplicit_2
+	{
+		static std::true_type fun(const volatile Base*) {}
+		static std::false_type fun(const volatile void*) {}
+	};
+
+	template <typename Base, typename Derived>
+	using MM_is_base_of_helper_2 = decltype(checkIfUpcastingImplicit_2<Base>::fun(static_cast<Derived*>(nullptr)));
+
+	//version 1
+	template <typename Base, typename Derived, typename T = void>
+	struct MM_is_base_of_2 : public std::true_type
+	{ };
+	
+	//version 2 : template partial specialization
+	template <typename Base, typename Derived>
+	struct MM_is_base_of_2<Base, Derived, std::void_t<MM_is_base_of_helper_2<Base, Derived>>>
+		: public MM_is_base_of_helper_2<Base, Derived>
+	{ };
+
+	//define constexpr global const object for value
+	template<typename Base, typename Derived>
+	constexpr const bool MM_is_base_of_2_v = MM_is_base_of_2<Base, Derived>::value;
+
+	void test_MM_is_base_of_2()
+	{
+		static_assert(MM_is_base_of_2_v<int, Base> == false, "");
+		static_assert(MM_is_base_of_1_v<int, string> == false, "");
+		static_assert(MM_is_base_of_2_v<Base, Different> == false, "");
+
+		static_assert(MM_is_base_of_2_v<Base, PublicDerived> == true, "");
+
+		static_assert(MM_is_base_of_2_v<Base, ProtectedDerived> == true, "");
+		static_assert(MM_is_base_of_2_v<Base, PrivateDerived> == true, "");
+		static_assert(MM_is_base_of_2_v<Base, DD> == true, ""); //Base is ambiguos base class of DD
+		static_assert(MM_is_base_of_2_v<ProtectedDerived, MultiDerived> == true, "");
+		static_assert(MM_is_base_of_2_v<Base, MultiDerived> == true, ""); //Base is ambiguos base class of MultiDerived
+		
+
+		auto retVal1 = checkIfUpcastingImplicit_1<int>(std::declval<Base*>());
+		auto retVal2 = checkIfUpcastingImplicit_1<int>(std::declval<string*>());
+		auto retVal3 = checkIfUpcastingImplicit_1<Base>(std::declval<Different*>());
+
+		auto retVal4 = checkIfUpcastingImplicit_1<Base>(std::declval<PublicDerived*>());
+
+		//auto retVal5 = checkIfUpcastingImplicit_1<Base>(std::declval<ProtectedDerived*>());
+		//typedef decltype(checkIfUpcastingImplicit_1<Base>(std::declval<ProtectedDerived*>())) type1;
+		//auto retVal6 = checkIfUpcastingImplicit_1<Base>(std::declval<PrivateDerived*>());
+		//auto retVal7 = checkIfUpcastingImplicit_1<Base>(std::declval<DD*>());
+		auto retVal8 = checkIfUpcastingImplicit_1<ProtectedDerived>(std::declval<MultiDerived*>());
+		//auto retVal9 = checkIfUpcastingImplicit_1<Base>(std::declval<MultiDerived*>());
+	}
+	*/
 
 	//------------------------------------------------------------------
 
 	// Implementation 1
 	/*
 	template<typename toT>
-	constexpr bool MM_is_convertible_helper_1(toT) { return true; }
+	constexpr bool MM_is_convertible_helper_1(toT) -> true { return true; }
+	template<typename toT>
+	constexpr bool MM_is_convertible_helper_1(...) -> true { return true; }
 
 	//template<typename toT>
 	//std::true_type MM_is_convertible_helper_1(...);
