@@ -11,7 +11,7 @@ LIBNAME := libMM_CommonUtils.a
 LDLIBS := MM_CommonUtils
 LDFLAGS := -static -L$(LIBPATH) -l$(LDLIBS)
 
-CXX := g++-curent
+CXX := g++-current
 CXXFLAGS_DEBUG := -Wall -g -m64 -std=c++17
 CXXFLAGS_WARN := -Wall -m64 -std=c++17
 CXXFLAGS_NO_WARN := -m64 -std=c++17
