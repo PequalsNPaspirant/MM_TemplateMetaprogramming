@@ -9,6 +9,7 @@ https://en.cppreference.com/w/cpp/types
 #include <vector>
 #include <map>
 #include <memory>
+#include<type_traits>
 using namespace std;
 
 namespace mm{
@@ -21,36 +22,46 @@ namespace mm{
 		{
 			data_ = make_unique< ConcreteType<T> >(obj);
 		}
-		//template<typename T>
-		//MM_Any(T&& obj)
-		//{
-		//	data_ = make_unique< ConcreteType<T> >(std::move(obj));
-		//}
+		template<typename T>
+		MM_Any(std::remove_reference_t<T>&& obj)
+		{
+			data_ = make_unique< ConcreteType<T> >(std::move(obj));
+		}
 
 		MM_Any(const MM_Any& copy)
 		{
-
+			data_ = copy.data_->clone();
 		}
 
-		//MM_Any(MM_Any&& move)
-		//{
-
-		//}
+		MM_Any(MM_Any&& move)
+		{
+			data_ = std::move(move.data_);
+		}
 
 		MM_Any& operator=(const MM_Any& copy)
 		{
+			if (this == &copy)
+				return *this;
+
+			data_ = copy.data_->clone();
 			return *this;
 		}
 
 		void operator=(MM_Any&& move)
 		{
-
+			data_ = std::move(move.data_);
 		}
 
 		template<typename T>
 		operator T()
 		{
-			return data_->getData<T>();
+			return getValue<T>();
+		}
+
+		template<typename T>
+		T getValue()
+		{
+			return data_->getValue<T>();
 		}
 
 	private:
@@ -58,15 +69,16 @@ namespace mm{
 		{
 		public:
 			template<typename T>
-			T getData()
+			T getValue()
 			{
 				ConcreteType<T>* ct = dynamic_cast<ConcreteType<T>*>(this);
 				if (ct != nullptr)
-					return ct->getConcreteData();
+					return ct->getConcreteValue();
 
 				return T{};
 			}
 
+			virtual unique_ptr<AnyType> clone() = 0;
 			virtual ~AnyType() {}
 		};
 
@@ -78,9 +90,9 @@ namespace mm{
 				: val_{ t }
 			{}
 
-			//ConcreteType(T&& t)
-			//	: val_{ std::move(t) }
-			//{}
+			ConcreteType(std::remove_reference_t<T>&& t)
+				: val_{ std::move(t) }
+			{}
 
 			//template<typename T>
 			//void getData(T& n) override
@@ -88,9 +100,14 @@ namespace mm{
 			//	n = val_;
 			//}
 
-			T getConcreteData()
+			T getConcreteValue()
 			{
 				return val_;
+			}
+
+			unique_ptr<AnyType> clone() override
+			{
+				return make_unique< ConcreteType<T> >(*this);
 			}
 
 		private:
