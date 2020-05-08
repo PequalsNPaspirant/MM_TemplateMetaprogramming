@@ -78,6 +78,10 @@ namespace mm {
 		//Test copy assignment
 
 		//Test move assignment
+
+		//Test function isType<T>()
+
+
 	}
 
 

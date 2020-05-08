@@ -64,6 +64,12 @@ namespace mm{
 			return data_->getValue<T>();
 		}
 
+		template<typename T>
+		bool isType()
+		{
+			return data_->isType<T>();
+		}
+
 	private:
 		class AnyType
 		{
@@ -76,6 +82,16 @@ namespace mm{
 					return ct->getConcreteValue();
 
 				return T{};
+			}
+
+			template<typename T>
+			bool isType()
+			{
+				ConcreteType<T>* ct = dynamic_cast<ConcreteType<T>*>(this);
+				if (ct != nullptr)
+					return true;
+
+				return false;
 			}
 
 			virtual unique_ptr<AnyType> clone() = 0;
