@@ -81,7 +81,7 @@ namespace mm {
 		template<typename T>
 		std::function<RetType(Args...)> operator()(T task)
 		{
-			std::function<RetType(Args...)> fun = [&](Args... args) { return task(std::forward<Args>(args)...) };
+			std::function<RetType(Args...)> fun = [&](Args... args) { return task(std::forward<Args>(args)...); };
 			return fun;
 		}
 	};
