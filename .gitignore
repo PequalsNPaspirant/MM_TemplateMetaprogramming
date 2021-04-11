@@ -38,3 +38,9 @@
 /project_settings/windows_visual_studio/MM_TemplateMetaprogramming/MM_TemplateMetaprogramming/x64/Release/MM_Templ.80B97CE0.tlog/*.tlog
 /project_settings/windows_visual_studio/MM_TemplateMetaprogramming/MM_TemplateMetaprogramming/x64/Release/MM_Templ.80B97CE0.tlog/*.lastbuildstate
 /project_settings/windows_visual_studio/MM_TemplateMetaprogramming/MM_TemplateMetaprogramming/x64/Release/*.log
+*.exe
+*.o
+project_settings/windows_visual_studio/MM_TemplateMetaprogramming/.vs/MM_TemplateMetaprogramming/v15/.suo
+*.db
+*.opendb
+*.ipch

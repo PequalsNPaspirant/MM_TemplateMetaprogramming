@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_forward.cpp" />
@@ -26,7 +27,7 @@
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_tuple.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_basics.cpp" />
     <ClCompile Include="..\..\..\..\src\Templates\Templates.cpp" />
-    <ClCompile Include="..\..\..\..\src\MM_TemplateMetaprogramming_main.cpp" />
+    <ClCompile Include="..\..\..\..\src\_MM_TemplateMetaprogramming_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.h" />

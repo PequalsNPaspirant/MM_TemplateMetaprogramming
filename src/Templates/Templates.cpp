@@ -96,19 +96,14 @@ namespace mm {
 			return inst;
 		}
 
-		enum class TaskName
-		{
-			dosomething
-		};
-
 		template<typename RetType, typename... Args>
-		void addTask(TaskName name, std::function<RetType(Args...)> task) const
+		void addTask(const string& name, std::function<RetType(Args...)> task) const
 		{
 			taskMap_[name] = std::make_shared<TaskImpl<RetType, Args...>>(task);
 		}
 
 		//template<typename T>
-		//void addTask(TaskName name, T task) const
+		//void addTask(const string& name, T task) const
 		//{
 		//	using FunType = std::function<RetType(Args...)>;
 		//	FunType fun = [](Args... args) {
@@ -118,11 +113,11 @@ namespace mm {
 		//}
 
 		template<typename RetType, typename... Args>
-		RetType runTask(TaskName name, Args... args) const
+		RetType runTask(const string& name, Args... args) const
 		{
 			auto it = taskMap_.find(name);
 			if (it == taskMap_.end())
-				return;
+				throw std::runtime_error{ "function does not exist" };
 
 			using FunType = std::function<RetType(Args...)>;
 			std::shared_ptr<FunType> fun = std::dynamic_pointer_cast<FunType>(it->second);
@@ -153,7 +148,7 @@ namespace mm {
 			std::function<RetType(Args...)> task_;
 		};
 
-		mutable std::unordered_map<TaskName, TaskRW> taskMap_;
+		mutable std::unordered_map<string, TaskRW> taskMap_;
 	};
 
 	int fun2(std::string& s)
@@ -175,16 +170,16 @@ namespace mm {
 		std::function<std::string(double)> fun1 = [](double flag) -> std::string {
 			return std::string{};
 		};
-		CustomTaskExecutor::getInstance().addTask(CustomTaskExecutor::TaskName::dosomething, fun1);
+		CustomTaskExecutor::getInstance().addTask("dosomething", fun1);
 
-		CustomTaskExecutor::getInstance().addTask(CustomTaskExecutor::TaskName::dosomething, convertToFun<int, std::string&>{}(fun2));
+		CustomTaskExecutor::getInstance().addTask("dosomething", convertToFun<int, std::string&>{}(fun2));
 
-		CustomTaskExecutor::getInstance().addTask(CustomTaskExecutor::TaskName::dosomething, convertToFun<char, const long long&>{}(fun3{}));
+		CustomTaskExecutor::getInstance().addTask("dosomething", convertToFun<char, const long long&>{}(fun3{}));
 
 		auto fun4 = [](bool flag) {
 			return 2.3;
 		};
-		CustomTaskExecutor::getInstance().addTask(CustomTaskExecutor::TaskName::dosomething, convertToFun<double, bool>{}(fun4));
+		CustomTaskExecutor::getInstance().addTask("dosomething", convertToFun<double, bool>{}(fun4));
 	}
 
 }

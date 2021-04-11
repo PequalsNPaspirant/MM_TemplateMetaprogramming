@@ -70,6 +70,11 @@ namespace mm{
 			return data_->isType<T>();
 		}
 
+		void doTask()
+		{
+
+		}
+
 	private:
 		class AnyType
 		{
@@ -95,6 +100,7 @@ namespace mm{
 			}
 
 			virtual unique_ptr<AnyType> clone() = 0;
+			virtual void doTask() = 0;
 			virtual ~AnyType() {}
 		};
 
@@ -124,6 +130,11 @@ namespace mm{
 			unique_ptr<AnyType> clone() override
 			{
 				return make_unique< ConcreteType<T> >(*this);
+			}
+
+			void doTask() override
+			{
+
 			}
 
 		private:

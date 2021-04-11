@@ -110,7 +110,7 @@ Output:
 	template<typename FirstType, typename... RestTypes>
 	void printDifferentTypesOfVariables(size_t width, string str, FirstType t, RestTypes... args)  // used when at least one variable is provided
 	{
-		int firstCommaPosition = str.find_first_of(',');
+		size_t firstCommaPosition = str.find_first_of(',');
 		printDifferentTypesOfVariables(width, str.substr(0, firstCommaPosition), t);
 		//MM_COUT << "\n";
 		printDifferentTypesOfVariables(width, str.substr(firstCommaPosition + 1, string::npos), args...);
@@ -161,7 +161,7 @@ Output:
 	string getCommaSeparatedTimeDuration(unsigned long long duration)
 	{
 		string durationStr = "000,000.000,000,000"; //Time less than 1,000,000 sec can be measured with this
-		int pos = durationStr.length() - 1;
+		int pos = static_cast<int>(durationStr.length() - 1);
 		while (duration > 0 && --pos > 0)
 		{
 			if (durationStr[pos] == '0')

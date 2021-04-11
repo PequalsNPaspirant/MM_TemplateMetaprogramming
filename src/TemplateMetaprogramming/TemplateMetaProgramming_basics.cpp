@@ -96,9 +96,9 @@ namespace mm {
 
 	MM_UNIT_TEST(TemplateMetaProgrammingBasicSyntaxTest_1, TemplateMetaProgrammingBasicSyntax)
 	{
-		Tuple<> t0;           // Types contains no arguments
-		Tuple<int> t1;        // Types contains one argument: int
-		Tuple<int, float> t2; // Types contains two arguments: int and float
+		//Tuple<> t0;           // Types contains no arguments
+		//Tuple<int> t1;        // Types contains one argument: int
+		//Tuple<int, float> t2; // Types contains two arguments: int and float
 		//Tuple<0> error;       // error: 0 is not a type
 		MM_EXPECT_TRUE(true)
 	}
