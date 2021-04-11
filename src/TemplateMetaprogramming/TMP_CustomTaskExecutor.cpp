@@ -81,9 +81,9 @@ namespace mm {
 		}
 
 		template<typename F>
-		void assign(F fun)
+		void assign(F task)
 		{
-			fun();
+			task();
 		}
 
 		std::string toString()
@@ -94,15 +94,14 @@ namespace mm {
 
 	// =========== CustomTaskExecutor_v1 ===========
 
-	template<typename RetType, typename FunType>
+	template<typename RetType, typename ExplicitFunType>
 	class CustomTaskExecutor_v1
 	{
 	public:
-		static bool addTask(const std::string& name, FunType fun)
+		static bool addTask(const std::string& name, ExplicitFunType task)
 		{
 			CustomTaskExecutor_v1& inst = getInstance();
-			using MapType = std::unordered_map<std::string, FunType>;
-			std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(fun) });
+			std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) });
 			if (!res.second)
 				return false;
 
@@ -127,15 +126,195 @@ namespace mm {
 			static CustomTaskExecutor_v1 inst;
 			return inst;
 		}
-		std::unordered_map<std::string, FunType> taskMap_;
+
+		using MapType = std::unordered_map<std::string, ExplicitFunType>;
+		MapType taskMap_;
+	};
+
+	// =========== CustomTaskExecutor_v3 ===========
+
+	class CustomTaskExecutor_v3
+	{
+	private:
+		static CustomTaskExecutor_v3 & getInstance()
+		{
+			static CustomTaskExecutor_v3 inst;
+			return inst;
+		}
+
+		class TaskObject
+		{
+		public:
+			virtual ~TaskObject() = 0 {} //Need implementation for pure virtual destructor
+		};
+
+		template<typename T>
+		class TaskObjectImpl : public TaskObject
+		{
+		public:
+			TaskObjectImpl(T&& task)
+				: task_{ std::forward<T>(task) }
+			{}
+			~TaskObjectImpl() override = default;
+
+			T getTask()
+			{
+				return task_;
+			}
+
+		private:
+			T task_;
+		};
+
+		using MapType = std::unordered_map<std::string, std::shared_ptr<TaskObject>>;
+		MapType taskMap_;
+
+	public:
+		template<typename RetType, typename ExplicitFunType>
+		class Task
+		{
+		public:
+			using TargetType = CustomTaskExecutor_v3::TaskObjectImpl<ExplicitFunType>;
+
+			template<typename F>
+			static bool addTask(const std::string& name, F task)
+			{
+				CustomTaskExecutor_v3& inst = CustomTaskExecutor_v3::getInstance();
+				std::shared_ptr<TaskObject>& ptrTask = inst.taskMap_[name];
+
+				if (ptrTask)
+					return false;
+
+				ptrTask = std::make_shared<TargetType>(std::move(task));
+				return true;
+			}
+
+			template<typename... Args>
+			static RetType runTask(const std::string& name, Args... args)
+			{
+				CustomTaskExecutor_v3& inst = CustomTaskExecutor_v3::getInstance();
+				MapType::iterator it = inst.taskMap_.find(name);
+				if (it == inst.taskMap_.end())
+					throw std::runtime_error{ "Task of relevant type is not available" };
+
+				auto ptrTaskImpl = std::dynamic_pointer_cast<TargetType>(it->second);
+				if (!ptrTaskImpl)
+					throw std::runtime_error{ "Either return type or the arguments to task are not maching" };
+
+				return ptrTaskImpl->getTask()(args...);
+			}
+
+			template<typename... Args>
+			static RetType runNoThrow(bool& success, const std::string& name, Args... args)
+			{
+				RetVal_v1<RetType> retVal;
+				try
+				{
+					retVal.assign([=]() { return Task::run(name, args...); });
+					success = true;
+				}
+				catch (...)
+				{
+					success = false;
+				}
+
+				return retVal.get();
+			}
+		};
 	};
 
 
-	// =========== CustomTaskExecutor_v2 ===========
+	// =========== CustomTaskExecutor_v4 ===========
 
-	template<typename RetType, typename FunType>
-	class CustomTaskExecutor_v2
+	class CustomTaskExecutor_v4
 	{
+	private:
+		static CustomTaskExecutor_v4 & getInstance()
+		{
+			static CustomTaskExecutor_v4 inst;
+			return inst;
+		}
+
+		class TaskObject
+		{
+		public:
+			virtual ~TaskObject() = 0 {} //Need implementation for pure virtual destructor
+		};
+
+		template<typename T>
+		class TaskObjectImpl : public TaskObject
+		{
+		public:
+			TaskObjectImpl(T&& task)
+				: task_{ std::forward<T>(task) }
+			{}
+			~TaskObjectImpl() override = default;
+
+			T getTask()
+			{
+				return task_;
+			}
+
+		private:
+			T task_;
+		};
+
+		using MapType = std::unordered_map<std::string, std::shared_ptr<TaskObject>>;
+		MapType taskMap_;
+
+	public:
+		template<typename RetType, typename... Args>
+		class Task
+		{
+		public:
+			using FunType = std::function<RetType(Args...)>;
+			using TargetType = CustomTaskExecutor_v4::TaskObjectImpl<FunType>;
+
+			template<typename F>
+			static bool addTask(const std::string& name, F task)
+			{
+				CustomTaskExecutor_v4& inst = CustomTaskExecutor_v4::getInstance();
+				std::shared_ptr<TaskObject>& ptrTask = inst.taskMap_[name];
+
+				if (ptrTask)
+					return false;
+
+				ptrTask = std::make_shared<TargetType>(std::move(task));
+				return true;
+			}
+
+			static RetType runTask(const std::string& name, Args... args)
+			{
+				CustomTaskExecutor_v4& inst = CustomTaskExecutor_v4::getInstance();
+				MapType::iterator it = inst.taskMap_.find(name);
+				if (it == inst.taskMap_.end())
+					throw std::runtime_error{ "Task of relevant type is not available" };
+
+				auto ptrTaskImpl = std::dynamic_pointer_cast<TargetType>(it->second);
+				if (!ptrTaskImpl)
+					throw std::runtime_error{ "Either return type or the arguments to task are not maching" };
+
+				return ptrTaskImpl->getTask()(args...);
+			}
+
+			static RetType runNoThrow(bool& success, const std::string& name, Args... args)
+			{
+				RetVal_v1<RetType> retVal;
+				try
+				{
+					retVal.assign([=]() { return Task::run(name, args...); });
+					success = true;
+				}
+				catch (...)
+				{
+					success = false;
+				}
+
+				return retVal.get();
+			}
+		};
+
+	
 	};
 
 	// =========== Test functions ===========
@@ -229,20 +408,20 @@ namespace mm {
 	struct TestFunctionStruct
 	{
 		template<typename ActualFunType, typename... Args>
-		static void testFunction(const std::string& funName, ActualFunType&& fun, Args... args)
+		static void testFunction(const std::string& funName, ActualFunType&& task, Args... args)
 		{
 			bool success1 = false;
 			bool success2 = false;
 			RetVal_v1<RetType> retVal;
 
 			std::cout << "\n\n" << funName << ":";
-			std::cout << "\n" << "addTask: "; success1 = CustomTaskExecutor<RetType, ExplicitFunType>::addTask(funName, fun); std::cout << " success1: " << success1;
-			std::cout << "\n" << "addTask: "; success2 = CustomTaskExecutor<RetType, ExplicitFunType>::addTask(funName, fun); std::cout << " success2: " << success2;
+			std::cout << "\n" << "addTask: "; success1 = CustomTaskExecutor<RetType, ExplicitFunType>::addTask(funName, task); std::cout << " success1: " << success1;
+			std::cout << "\n" << "addTask: "; success2 = CustomTaskExecutor<RetType, ExplicitFunType>::addTask(funName, task); std::cout << " success2: " << success2;
 			auto lambda = [=]() { return CustomTaskExecutor<RetType, ExplicitFunType>::runTask(funName, args...); };
 			std::cout << "\n" << "runTask: "; retVal.assign(lambda); std::cout << " retVal: '" << retVal.toString() << "'";
 
 			RetVal_v1<RetType> expectedOutput;
-			std::cout << "\n" << "run actual fun to get expected output: "; expectedOutput.assign([=]() { return fun(args...); });
+			std::cout << "\n" << "run actual task to get expected output: "; expectedOutput.assign([=]() { return task(args...); });
 
 			cout << "\n\n";
 			MM_EXPECT_TRUE(success1 == true);
@@ -339,7 +518,9 @@ namespace mm {
 
 	void testAllCustomTaskExecutorVersions()
 	{
-		testCustomTaskExecutor<CustomTaskExecutor_v1>();
+		//testCustomTaskExecutor<CustomTaskExecutor_v1>();
+		testCustomTaskExecutor<CustomTaskExecutor_v3::Task>();
+		//testCustomTaskExecutor<CustomTaskExecutor_v4::Task>();
 	}
 
 	MM_DECLARE_FLAG(TemplateMetaProgrammingCustomTaskExecutor_v1);
