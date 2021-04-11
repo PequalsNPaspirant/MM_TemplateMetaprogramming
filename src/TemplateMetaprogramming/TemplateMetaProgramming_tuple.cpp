@@ -32,6 +32,7 @@ namespace mm {
 		[const char* tail, uint64_t tail, double tail]
 		*/
 
+#if defined(_MSC_VER)
 		MM_EXPECT_TRUE(typeid(tuple<double, uint64_t, const char*>::elementType<0>::type) == typeid(double))
 		MM_EXPECT_TRUE(typeid(tuple<double, uint64_t, const char*>::elementType<1>::type) == typeid(uint64_t))
 		MM_EXPECT_TRUE(typeid(tuple<double, uint64_t, const char*>::elementType<2>::type) == typeid(const char*))
@@ -43,5 +44,9 @@ namespace mm {
 		MM_EXPECT_TRUE(typeid(tuple<double, uint64_t, const char*>::elementType<0>::type) == typeid(t1.getAt<0>()))
 		MM_EXPECT_TRUE(typeid(tuple<double, uint64_t, const char*>::elementType<1>::type) == typeid(t1.getAt<1>()))
 		MM_EXPECT_TRUE(typeid(tuple<double, uint64_t, const char*>::elementType<2>::type) == typeid(t1.getAt<2>()))
+#elif defined(__GNUC__)
+
+#endif
+
 	}
 }

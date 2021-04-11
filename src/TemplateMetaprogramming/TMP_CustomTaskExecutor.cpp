@@ -101,7 +101,8 @@ namespace mm {
 		static bool addTask(const std::string& name, ExplicitFunType task)
 		{
 			CustomTaskExecutor_v1& inst = getInstance();
-			std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) });
+			//std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) });
+			auto res = inst.taskMap_.insert(typename MapType::value_type( name, std::move(task) ));
 			if (!res.second)
 				return false;
 
@@ -141,7 +142,8 @@ namespace mm {
 		static bool addTask(const std::string& name, T task)
 		{
 			CustomTaskExecutor_v2& inst = getInstance();
-			std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) });
+			//std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) });
+			auto res = inst.taskMap_.insert(typename MapType::value_type( name, std::move(task) ));
 			if (!res.second)
 				return false;
 
@@ -185,7 +187,7 @@ namespace mm {
 		class TaskObject
 		{
 		public:
-			virtual ~TaskObject() = 0 {} //Need implementation for pure virtual destructor
+			virtual ~TaskObject() {} //Need implementation for pure virtual destructor
 		};
 
 		template<typename T>
@@ -278,7 +280,7 @@ namespace mm {
 		class TaskObject
 		{
 		public:
-			virtual ~TaskObject() = 0 {} //Need implementation for pure virtual destructor
+			virtual ~TaskObject() {} //Need implementation for pure virtual destructor
 		};
 
 		template<typename T>
@@ -509,6 +511,7 @@ namespace mm {
 		using FunType7 = std::function<std::string(const std::string&, double, long long)>;
 		using FunType8 = decltype(cStyleFunStringConstRefStringDoubleLonglong);
 
+#if defined(_MSC_VER)
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType1>::testFunction(funName, cStyleFunVoidVoid);
 		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType2>::testFunction(funName, cStyleFunVoidVoid); //Error while inserting into unordered_map: No constructor could take the source type, or constructor overload resolution was ambiguous
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType3>::testFunction(funName, cStyleFunVoidInt, intIn);
@@ -517,6 +520,7 @@ namespace mm {
 		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType6>::testFunction(funName, cStyleFunStringDouble, dIn);
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType7>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
 		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType8>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+#endif
 
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType1>::testFunction(funName, Functor{});
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType3>::testFunction(funName, Functor{}, intIn);
@@ -589,10 +593,12 @@ namespace mm {
 		using TestFunctionStruct3 = TestFunctionStruct<CustomTaskExecutor, std::string, double>;
 		using TestFunctionStruct4 = TestFunctionStruct<CustomTaskExecutor, std::string, const std::string&, double, long long>;
 
+#if defined(_MSC_VER)
 		incrementInput(); TestFunctionStruct1::testFunction(funName, cStyleFunVoidVoid);
 		incrementInput(); TestFunctionStruct2::testFunction(funName, cStyleFunVoidInt, intIn);
 		incrementInput(); TestFunctionStruct3::testFunction(funName, cStyleFunStringDouble, dIn);
 		incrementInput(); TestFunctionStruct4::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+#endif
 
 		incrementInput(); TestFunctionStruct1::testFunction(funName, Functor{});
 		incrementInput(); TestFunctionStruct2::testFunction(funName, Functor{}, intIn);

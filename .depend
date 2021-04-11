@@ -1,29 +1,32 @@
 
-obj/windows_gcc/MM_TemplateMetaprogramming_main.o: src/MM_TemplateMetaprogramming_main.cpp \
- ../MM_CommonUtils/src/WindowsUtils/WindowsUtils.h \
- ../MM_CommonUtils/src/Timer/Timer.h \
- ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h
+obj/windows_gcc/TemplateMetaprogramming/MM_Any.o: src/TemplateMetaprogramming/MM_Any.cpp \
+ src/TemplateMetaprogramming/MM_Any.h \
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h
 
 obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_basics.o: src/TemplateMetaprogramming/TemplateMetaProgramming_basics.cpp \
  src/TemplateMetaprogramming/TemplateMetaProgramming_basics.h \
- ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h
 
 obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_forward.o: src/TemplateMetaprogramming/TemplateMetaProgramming_forward.cpp
 
 obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_tuple.o: src/TemplateMetaprogramming/TemplateMetaProgramming_tuple.cpp \
  src/TemplateMetaprogramming/TemplateMetaProgramming_tuple.h \
- ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h
 
 obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_using.o: src/TemplateMetaprogramming/TemplateMetaProgramming_using.cpp
 
+obj/windows_gcc/TemplateMetaprogramming/TMP_CustomTaskExecutor.o: src/TemplateMetaprogramming/TMP_CustomTaskExecutor.cpp \
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h
+
 obj/windows_gcc/TemplateMetaprogramming/TMP_type_traits.o: src/TemplateMetaprogramming/TMP_type_traits.cpp \
  src/TemplateMetaprogramming/TMP_type_traits.h \
- ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h \
- ../MM_CommonUtils/src/Assert/MyAssert.h
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h
 
 obj/windows_gcc/TemplateMetaprogramming/TMP_unique_ptr_polymorphism.o: src/TemplateMetaprogramming/TMP_unique_ptr_polymorphism.cpp \
  src/TemplateMetaprogramming/TMP_unique_ptr_polymorphism.h \
- ../MM_UnitTestFramework/src/MM_UnitTestFramework/MM_UnitTestFramework.h \
- ../MM_CommonUtils/src/Assert/MyAssert.h
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h
 
 obj/windows_gcc/Templates/Templates.o: src/Templates/Templates.cpp
+
+obj/windows_gcc/_MM_TemplateMetaprogramming_main.o: src/_MM_TemplateMetaprogramming_main.cpp \
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h

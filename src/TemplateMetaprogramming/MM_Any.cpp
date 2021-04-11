@@ -120,7 +120,7 @@ namespace mm {
 		}
 	};
 
-	//TODO: MOve it to some other project
+	//TODO: Move it to some other project
 	MM_DECLARE_FLAG(MM_returnTypeCovariance);
 
 	MM_UNIT_TEST(MM_returnTypeCovariance_test_1, MM_returnTypeCovariance)

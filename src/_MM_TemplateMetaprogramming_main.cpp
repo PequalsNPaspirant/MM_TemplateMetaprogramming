@@ -12,6 +12,8 @@ namespace mm {
 	MM_DEFINE_FLAG(false, TemplateMetaProgrammingBasicSyntax);
 	MM_DEFINE_FLAG(false, TemplateMetaProgramming_tuple);
 	MM_DEFINE_FLAG(false, TMP_unique_ptr_polymorphism);
+	MM_DEFINE_FLAG(false, MM_Any_type);
+	MM_DEFINE_FLAG(false, MM_returnTypeCovariance);
 	MM_DEFINE_FLAG(true, TemplateMetaProgrammingCustomTaskExecutor_v1);
 }
 

@@ -6,12 +6,12 @@ APP := $(shell echo `pwd` | sed 's/^.*\///g')
 APP_NAME := $(OUTDIR)/$(APP)_gcc.exe
 THIRD_PARTY_INCLUDE := -I../MM_CommonUtils/src -I../MM_UnitTestFramework/src
 
-LIBPATH := ../MM_CommonUtils/bin/windows_gcc
-LIBNAME := libMM_CommonUtils.a
-LDLIBS := MM_CommonUtils
-LDFLAGS := -static -L$(LIBPATH) -l$(LDLIBS)
+## LIBPATH := ../MM_CommonUtils/bin/windows_gcc
+## LIBNAME := libMM_CommonUtils.a
+## LDLIBS := MM_CommonUtils
+## LDFLAGS := -static -L$(LIBPATH) -l$(LDLIBS)
 
-CXX := g++-current
+CXX := g++
 CXXFLAGS_DEBUG := -Wall -g -m64 -std=c++17
 CXXFLAGS_WARN := -Wall -m64 -std=c++17
 CXXFLAGS_NO_WARN := -m64 -std=c++17
@@ -44,7 +44,8 @@ $(LIBPATH)/$(LIBNAME):
 $(APP_NAME): $(OBJECTS) $(LIBPATH)/$(LIBNAME)
 	@echo ""
 	@echo "========== Linking =========="
-	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+	##$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+	$(CXX) -o $@ $(OBJECTS)
 	@echo ""
 	@echo "========== SUCCESS =========="
 	@echo ""
