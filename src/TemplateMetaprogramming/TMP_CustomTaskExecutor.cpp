@@ -131,6 +131,46 @@ namespace mm {
 		MapType taskMap_;
 	};
 
+	// =========== CustomTaskExecutor_v2 ===========
+
+	template<typename RetType, typename... Args>
+	class CustomTaskExecutor_v2
+	{
+	public:
+		template<typename T>
+		static bool addTask(const std::string& name, T task)
+		{
+			CustomTaskExecutor_v2& inst = getInstance();
+			std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) });
+			if (!res.second)
+				return false;
+
+			return true;
+		}
+
+		static RetType runTask(const std::string& name, Args... args)
+		{
+			RetVal_v1<RetType> ret;
+			CustomTaskExecutor_v2& inst = getInstance();
+			auto it = inst.taskMap_.find(name);
+			if (it == inst.taskMap_.end())
+				return ret.get();
+
+			return it->second(args...);
+		}
+
+	private:
+		static CustomTaskExecutor_v2& getInstance()
+		{
+			static CustomTaskExecutor_v2 inst;
+			return inst;
+		}
+
+		using ExplicitFunType = std::function<RetType(Args...)>;
+		using MapType = std::unordered_map<std::string, ExplicitFunType>;
+		MapType taskMap_;
+	};
+
 	// =========== CustomTaskExecutor_v3 ===========
 
 	class CustomTaskExecutor_v3
@@ -572,8 +612,9 @@ namespace mm {
 
 	void testAllCustomTaskExecutorVersions()
 	{
-		//testCustomTaskExecutor_v1v3<CustomTaskExecutor_v1>();
-		//testCustomTaskExecutor_v1v3<CustomTaskExecutor_v3::Task>();
+		testCustomTaskExecutor_v1v3<CustomTaskExecutor_v1>();
+		testCustomTaskExecutor_v2v4<CustomTaskExecutor_v2>();
+		testCustomTaskExecutor_v1v3<CustomTaskExecutor_v3::Task>();
 		testCustomTaskExecutor_v2v4<CustomTaskExecutor_v4::Task>();
 	}
 
