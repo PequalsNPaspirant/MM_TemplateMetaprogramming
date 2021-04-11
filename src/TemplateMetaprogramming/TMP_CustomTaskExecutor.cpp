@@ -99,11 +99,11 @@ namespace mm {
 		static bool addTask(const std::string& name, FunType fun)
 		{
 			CustomTaskExecutor_v1& inst = getInstance();
-			auto it = inst.taskMap_.find(name);
-			if (it != inst.taskMap_.end())
+			using MapType = std::unordered_map<std::string, FunType>;
+			std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(fun) });
+			if (!res.second)
 				return false;
 
-			inst.taskMap_[name] = fun;
 			return true;
 		}
 
@@ -128,30 +128,96 @@ namespace mm {
 		std::unordered_map<std::string, FunType> taskMap_;
 	};
 
+	//c-style functions
 	void cStyleFunVoidVoid()
 	{
 		std::cout << "cStyleFunVoidVoid()";
 	}
 	void cStyleFunVoidInt(int n)
 	{
-		std::cout << "cStyleFunVoidInt() Args: n: " << n;
+		std::cout << "cStyleFunVoidInt(int n) Args: n: " << n;
 	}
 	std::string cStyleFunStringDouble(double d)
 	{
-		std::cout << "cStyleFunStringDouble() Args: d: " << d;
+		std::cout << "std::string cStyleFunStringDouble(double d) Args: d: " << d;
 		return std::string{"Args: "} + std::to_string(d);
 	}
 	std::string cStyleFunStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll)
 	{
-		std::cout << "cStyleFunStringConstRefStringDoubleLonglong() Args: s: " << s << " d: " << d << " ll: " << ll;
+		std::cout << "std::string cStyleFunStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
 		return std::string{ "Args: " } + s + "," + std::to_string(d) + "," + std::to_string(ll);
 	}
+
+	//functors
+	class Functor
+	{
+	public:
+		void operator()() const
+		{
+			std::cout << "operator()()";
+		}
+		void operator()(int n) const
+		{
+			std::cout << "operator()(int n) Args: n: " << n;
+		}
+		std::string operator()(double d) const
+		{
+			std::cout << "std::string operator()(double d) Args: d: " << d;
+			return std::string{ "Args: " } +std::to_string(d);
+		}
+		std::string operator()(const std::string& s, double d, long long ll) const
+		{
+			std::cout << "std::string operator()(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
+			return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
+		}
+	};
+
+	//lambdas
+	auto lambdaVoidVoid = []()
+	{
+		std::cout << "lambdaVoidVoid()";
+	};
+	auto lambdaVoidInt = [](int n)
+	{
+		std::cout << "lambdaVoidInt(int n) Args: n: " << n;
+	};
+	auto lambdaStringDouble = [](double d) -> std::string
+	{
+		std::cout << "std::string lambdaStringDouble(double d) Args: d: " << d;
+		return std::string{ "Args: " } +std::to_string(d);
+	};
+	auto lambdaStringConstRefStringDoubleLonglong = [](const std::string& s, double d, long long ll) -> std::string
+	{
+		std::cout << "std::string lambdaStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
+		return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
+	};
+
+	//std::functions
+	std::function<void(void)> stdFunVoidVoid = []()
+	{
+		std::cout << "lambdaVoidVoid()";
+	};
+	std::function<void(int)> stdFunVoidInt = [](int n)
+	{
+		std::cout << "lambdaVoidInt(int n) Args: n: " << n;
+	};
+	std::function<std::string(double)> stdFunStringDouble = [](double d) -> std::string
+	{
+		std::cout << "std::string lambdaStringDouble(double d) Args: d: " << d;
+		return std::string{ "Args: " } +std::to_string(d);
+	};
+	std::function<std::string(const std::string&, double, long long)> stdFunStringConstRefStringDoubleLonglong = [](const std::string& s, double d, long long ll) -> std::string
+	{
+		std::cout << "std::string lambdaStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
+		return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
+	};
+	
 
 	template<typename RetType, typename ExplicitFunType>
 	struct TestFunctionStruct
 	{
 		template<typename ActualFunType, typename... Args>
-		static void testFunction(const std::string& funName, ActualFunType fun, Args... args)
+		static void testFunction(const std::string& funName, ActualFunType&& fun, Args... args)
 		{
 			bool success1 = false;
 			bool success2 = false;
@@ -200,41 +266,61 @@ namespace mm {
 					strIn[i] = 'a';
 			}
 		};
-		//bool success = false;
-		//std::string retVal{""};
 
-		//std::cout << "\n" << "fun1:";
 		using FunType1 = std::function<void(void)>;
-		//std::cout << "\n" << "addTask: "; success = CustomTaskExecutor_v1<void, FunType1>::addTask("fun1", cStyleFunVoidVoid);
-		//std::cout << "\n" << "runTask: "; CustomTaskExecutor_v1<void, FunType1>::runTask("fun1");
-		//std::cout << "\n" << "success: " << success << " retVal: " << retVal;
-		incrementInput();
-		TestFunctionStruct<void, FunType1>::testFunction(funName, cStyleFunVoidVoid);
+		using FunType2 = decltype(cStyleFunVoidVoid);
+		using FunType3 = std::function<void(int)>;
+		using FunType4 = decltype(cStyleFunVoidInt);
+		using FunType5 = std::function<std::string(double)>;
+		using FunType6 = decltype(cStyleFunStringDouble);
+		using FunType7 = std::function<std::string(const std::string&, double, long long)>;
+		using FunType8 = decltype(cStyleFunStringConstRefStringDoubleLonglong);
 
-		//std::cout << "\n" << "fun2:";
-		using FunType2 = std::function<void(int)>;
-		//std::cout << "\n" << "addTask: "; success = CustomTaskExecutor_v1<void, FunType2>::addTask("fun2", cStyleFunVoidInt);
-		//std::cout << "\n" << "runTask: "; CustomTaskExecutor_v1<void, FunType2>::runTask("fun2", 3);
-		//std::cout << "\n" << "success: " << success << " retVal: " << retVal;
-		incrementInput();
-		TestFunctionStruct<void, FunType2>::testFunction(funName, cStyleFunVoidInt, intIn);
+		incrementInput(); TestFunctionStruct<void, FunType1>::testFunction(funName, cStyleFunVoidVoid);
+		//incrementInput(); TestFunctionStruct<void, FunType2>::testFunction(funName, cStyleFunVoidVoid); //Error while inserting into unordered_map: No constructor could take the source type, or constructor overload resolution was ambiguous
+		incrementInput(); TestFunctionStruct<void, FunType3>::testFunction(funName, cStyleFunVoidInt, intIn);
+		//incrementInput(); TestFunctionStruct<void, FunType4>::testFunction(funName, cStyleFunVoidInt, intIn);
+		incrementInput(); TestFunctionStruct<std::string, FunType5>::testFunction(funName, cStyleFunStringDouble, dIn);
+		//incrementInput(); TestFunctionStruct<std::string, FunType6>::testFunction(funName, cStyleFunStringDouble, dIn);
+		incrementInput(); TestFunctionStruct<std::string, FunType7>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+		//incrementInput(); TestFunctionStruct<std::string, FunType8>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
 
-		//std::cout << "\n" << "fun3:";
-		using FunType3 = std::function<std::string(double)>;
-		//std::cout << "\n" << "addTask: "; success = CustomTaskExecutor_v1<std::string, FunType3>::addTask("fun3", cStyleFunStringDouble);
-		//std::cout << "\n" << "runTask: "; retVal = CustomTaskExecutor_v1<std::string, FunType3>::runTask("fun3", 11.11);
-		//std::cout << "\n" << "success: " << success << " retVal: " << retVal;
-		incrementInput();
-		TestFunctionStruct<std::string, FunType3>::testFunction(funName, cStyleFunStringDouble, dIn);
+		incrementInput(); TestFunctionStruct<void, FunType1>::testFunction(funName, Functor{});
+		incrementInput(); TestFunctionStruct<void, FunType3>::testFunction(funName, Functor{}, intIn);
+		incrementInput(); TestFunctionStruct<std::string, FunType5>::testFunction(funName, Functor{}, dIn);
+		incrementInput(); TestFunctionStruct<std::string, FunType7>::testFunction(funName, Functor{}, strIn, dIn, llIn);
 
-		//std::cout << "\n" << "fun4:";
-		using FunType4 = std::function<std::string(const std::string&, double, long long)>;
-		//std::cout << "\n" << "addTask: "; success = CustomTaskExecutor_v1<std::string, FunType4>::addTask("fun4", cStyleFunStringStringDoubleLonglong);
-		//std::cout << "\n" << "runTask: "; retVal = CustomTaskExecutor_v1<std::string, FunType4>::runTask("fun4", "aaa", 22.22, 2222);
-		//std::cout << "\n" << "success: " << success << " retVal: " << retVal;
-		incrementInput();
-		TestFunctionStruct<std::string, FunType4>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+		{
+			using FunType2 = decltype(lambdaVoidVoid);
+			using FunType4 = decltype(lambdaVoidInt);
+			using FunType6 = decltype(lambdaStringDouble);
+			using FunType8 = decltype(lambdaStringConstRefStringDoubleLonglong);
 
+			incrementInput(); TestFunctionStruct<void, FunType1>::testFunction(funName, lambdaVoidVoid);
+			incrementInput(); TestFunctionStruct<void, FunType2>::testFunction(funName, lambdaVoidVoid);
+			incrementInput(); TestFunctionStruct<void, FunType3>::testFunction(funName, lambdaVoidInt, intIn);
+			incrementInput(); TestFunctionStruct<void, FunType4>::testFunction(funName, lambdaVoidInt, intIn);
+			incrementInput(); TestFunctionStruct<std::string, FunType5>::testFunction(funName, lambdaStringDouble, dIn);
+			incrementInput(); TestFunctionStruct<std::string, FunType6>::testFunction(funName, lambdaStringDouble, dIn);
+			incrementInput(); TestFunctionStruct<std::string, FunType7>::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			incrementInput(); TestFunctionStruct<std::string, FunType8>::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+		}
+
+		{
+			using FunType2 = decltype(stdFunVoidVoid);
+			using FunType4 = decltype(stdFunVoidInt);
+			using FunType6 = decltype(stdFunStringDouble);
+			using FunType8 = decltype(stdFunStringConstRefStringDoubleLonglong);
+
+			incrementInput(); TestFunctionStruct<void, FunType1>::testFunction(funName, stdFunVoidVoid);
+			incrementInput(); TestFunctionStruct<void, FunType2>::testFunction(funName, stdFunVoidVoid);
+			incrementInput(); TestFunctionStruct<void, FunType3>::testFunction(funName, stdFunVoidInt, intIn);
+			incrementInput(); TestFunctionStruct<void, FunType4>::testFunction(funName, stdFunVoidInt, intIn);
+			incrementInput(); TestFunctionStruct<std::string, FunType5>::testFunction(funName, stdFunStringDouble, dIn);
+			incrementInput(); TestFunctionStruct<std::string, FunType6>::testFunction(funName, stdFunStringDouble, dIn);
+			incrementInput(); TestFunctionStruct<std::string, FunType7>::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			incrementInput(); TestFunctionStruct<std::string, FunType8>::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+		}
 	}
 
 	MM_DECLARE_FLAG(TemplateMetaProgrammingCustomTaskExecutor_v1);
