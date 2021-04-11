@@ -44,7 +44,7 @@ namespace mm {
 
 		template<typename U, std::enable_if_t<!std::is_same_v<T, U>, void>* dummy = nullptr>
 		//bool operator==(const RetVal_v1<U>& rhs)
-		bool operator==(const U& rhs)
+		bool operator==(const U& rhs) //Ignore all other types than T and RetVal_v1<T>
 		{
 			return false;
 		}
@@ -213,7 +213,7 @@ namespace mm {
 	};
 	
 
-	template<typename RetType, typename ExplicitFunType>
+	template<template<typename RetType, typename FunType> class CustomTaskExecutor, typename RetType, typename ExplicitFunType>
 	struct TestFunctionStruct
 	{
 		template<typename ActualFunType, typename... Args>
@@ -224,9 +224,9 @@ namespace mm {
 			RetVal_v1<RetType> retVal;
 
 			std::cout << "\n\n" << funName << ":";
-			std::cout << "\n" << "addTask: "; success1 = CustomTaskExecutor_v1<RetType, ExplicitFunType>::addTask(funName, fun); std::cout << " success1: " << success1;
-			std::cout << "\n" << "addTask: "; success2 = CustomTaskExecutor_v1<RetType, ExplicitFunType>::addTask(funName, fun); std::cout << " success2: " << success2;
-			auto lambda = [=]() { return CustomTaskExecutor_v1<RetType, ExplicitFunType>::runTask(funName, args...); };
+			std::cout << "\n" << "addTask: "; success1 = CustomTaskExecutor<RetType, ExplicitFunType>::addTask(funName, fun); std::cout << " success1: " << success1;
+			std::cout << "\n" << "addTask: "; success2 = CustomTaskExecutor<RetType, ExplicitFunType>::addTask(funName, fun); std::cout << " success2: " << success2;
+			auto lambda = [=]() { return CustomTaskExecutor<RetType, ExplicitFunType>::runTask(funName, args...); };
 			std::cout << "\n" << "runTask: "; retVal.assign(lambda); std::cout << " retVal: '" << retVal.toString() << "'";
 
 			RetVal_v1<RetType> expectedOutput;
@@ -236,10 +236,12 @@ namespace mm {
 			MM_EXPECT_TRUE(success1 == true);
 			MM_EXPECT_TRUE(success2 == false);
 			MM_EXPECT_TRUE(retVal == expectedOutput, retVal.toString(), expectedOutput.toString());
-			
+
 		}
 	};
 
+
+	template<template<typename RetType, typename FunType> class CustomTaskExecutor>
 	void testCustomTaskExecutor()
 	{
 		std::cout << std::boolalpha;
@@ -276,19 +278,19 @@ namespace mm {
 		using FunType7 = std::function<std::string(const std::string&, double, long long)>;
 		using FunType8 = decltype(cStyleFunStringConstRefStringDoubleLonglong);
 
-		incrementInput(); TestFunctionStruct<void, FunType1>::testFunction(funName, cStyleFunVoidVoid);
-		//incrementInput(); TestFunctionStruct<void, FunType2>::testFunction(funName, cStyleFunVoidVoid); //Error while inserting into unordered_map: No constructor could take the source type, or constructor overload resolution was ambiguous
-		incrementInput(); TestFunctionStruct<void, FunType3>::testFunction(funName, cStyleFunVoidInt, intIn);
-		//incrementInput(); TestFunctionStruct<void, FunType4>::testFunction(funName, cStyleFunVoidInt, intIn);
-		incrementInput(); TestFunctionStruct<std::string, FunType5>::testFunction(funName, cStyleFunStringDouble, dIn);
-		//incrementInput(); TestFunctionStruct<std::string, FunType6>::testFunction(funName, cStyleFunStringDouble, dIn);
-		incrementInput(); TestFunctionStruct<std::string, FunType7>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
-		//incrementInput(); TestFunctionStruct<std::string, FunType8>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType1>::testFunction(funName, cStyleFunVoidVoid);
+		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType2>::testFunction(funName, cStyleFunVoidVoid); //Error while inserting into unordered_map: No constructor could take the source type, or constructor overload resolution was ambiguous
+		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType3>::testFunction(funName, cStyleFunVoidInt, intIn);
+		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType4>::testFunction(funName, cStyleFunVoidInt, intIn);
+		incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType5>::testFunction(funName, cStyleFunStringDouble, dIn);
+		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType6>::testFunction(funName, cStyleFunStringDouble, dIn);
+		incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType7>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType8>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
 
-		incrementInput(); TestFunctionStruct<void, FunType1>::testFunction(funName, Functor{});
-		incrementInput(); TestFunctionStruct<void, FunType3>::testFunction(funName, Functor{}, intIn);
-		incrementInput(); TestFunctionStruct<std::string, FunType5>::testFunction(funName, Functor{}, dIn);
-		incrementInput(); TestFunctionStruct<std::string, FunType7>::testFunction(funName, Functor{}, strIn, dIn, llIn);
+		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType1>::testFunction(funName, Functor{});
+		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType3>::testFunction(funName, Functor{}, intIn);
+		incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType5>::testFunction(funName, Functor{}, dIn);
+		incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType7>::testFunction(funName, Functor{}, strIn, dIn, llIn);
 
 		{
 			using FunType2 = decltype(lambdaVoidVoid);
@@ -296,14 +298,14 @@ namespace mm {
 			using FunType6 = decltype(lambdaStringDouble);
 			using FunType8 = decltype(lambdaStringConstRefStringDoubleLonglong);
 
-			incrementInput(); TestFunctionStruct<void, FunType1>::testFunction(funName, lambdaVoidVoid);
-			incrementInput(); TestFunctionStruct<void, FunType2>::testFunction(funName, lambdaVoidVoid);
-			incrementInput(); TestFunctionStruct<void, FunType3>::testFunction(funName, lambdaVoidInt, intIn);
-			incrementInput(); TestFunctionStruct<void, FunType4>::testFunction(funName, lambdaVoidInt, intIn);
-			incrementInput(); TestFunctionStruct<std::string, FunType5>::testFunction(funName, lambdaStringDouble, dIn);
-			incrementInput(); TestFunctionStruct<std::string, FunType6>::testFunction(funName, lambdaStringDouble, dIn);
-			incrementInput(); TestFunctionStruct<std::string, FunType7>::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
-			incrementInput(); TestFunctionStruct<std::string, FunType8>::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType1>::testFunction(funName, lambdaVoidVoid);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType2>::testFunction(funName, lambdaVoidVoid);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType3>::testFunction(funName, lambdaVoidInt, intIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType4>::testFunction(funName, lambdaVoidInt, intIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType5>::testFunction(funName, lambdaStringDouble, dIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType6>::testFunction(funName, lambdaStringDouble, dIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType7>::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType8>::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
 		}
 
 		{
@@ -312,22 +314,27 @@ namespace mm {
 			using FunType6 = decltype(stdFunStringDouble);
 			using FunType8 = decltype(stdFunStringConstRefStringDoubleLonglong);
 
-			incrementInput(); TestFunctionStruct<void, FunType1>::testFunction(funName, stdFunVoidVoid);
-			incrementInput(); TestFunctionStruct<void, FunType2>::testFunction(funName, stdFunVoidVoid);
-			incrementInput(); TestFunctionStruct<void, FunType3>::testFunction(funName, stdFunVoidInt, intIn);
-			incrementInput(); TestFunctionStruct<void, FunType4>::testFunction(funName, stdFunVoidInt, intIn);
-			incrementInput(); TestFunctionStruct<std::string, FunType5>::testFunction(funName, stdFunStringDouble, dIn);
-			incrementInput(); TestFunctionStruct<std::string, FunType6>::testFunction(funName, stdFunStringDouble, dIn);
-			incrementInput(); TestFunctionStruct<std::string, FunType7>::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
-			incrementInput(); TestFunctionStruct<std::string, FunType8>::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType1>::testFunction(funName, stdFunVoidVoid);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType2>::testFunction(funName, stdFunVoidVoid);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType3>::testFunction(funName, stdFunVoidInt, intIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType4>::testFunction(funName, stdFunVoidInt, intIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType5>::testFunction(funName, stdFunStringDouble, dIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType6>::testFunction(funName, stdFunStringDouble, dIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType7>::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType8>::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
 		}
+	}
+
+	void testAllCustomTaskExecutorVersions()
+	{
+		testCustomTaskExecutor<CustomTaskExecutor_v1>();
 	}
 
 	MM_DECLARE_FLAG(TemplateMetaProgrammingCustomTaskExecutor_v1);
 
 	MM_UNIT_TEST(TemplateMetaProgrammingCustomTaskExecutorTest_v1, TemplateMetaProgrammingCustomTaskExecutor_v1)
 	{
-		testCustomTaskExecutor();
+		testAllCustomTaskExecutorVersions();
 	}
 }
 
