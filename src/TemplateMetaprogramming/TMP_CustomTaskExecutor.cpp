@@ -92,6 +92,8 @@ namespace mm {
 		}
 	};
 
+	// =========== CustomTaskExecutor_v1 ===========
+
 	template<typename RetType, typename FunType>
 	class CustomTaskExecutor_v1
 	{
@@ -127,6 +129,16 @@ namespace mm {
 		}
 		std::unordered_map<std::string, FunType> taskMap_;
 	};
+
+
+	// =========== CustomTaskExecutor_v2 ===========
+
+	template<typename RetType, typename FunType>
+	class CustomTaskExecutor_v2
+	{
+	};
+
+	// =========== Test functions ===========
 
 	//c-style functions
 	void cStyleFunVoidVoid()
@@ -213,7 +225,7 @@ namespace mm {
 	};
 	
 
-	template<template<typename RetType, typename FunType> class CustomTaskExecutor, typename RetType, typename ExplicitFunType>
+	template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename ExplicitFunType>
 	struct TestFunctionStruct
 	{
 		template<typename ActualFunType, typename... Args>
@@ -241,7 +253,7 @@ namespace mm {
 	};
 
 
-	template<template<typename RetType, typename FunType> class CustomTaskExecutor>
+	template<template<typename... Args> class CustomTaskExecutor>
 	void testCustomTaskExecutor()
 	{
 		std::cout << std::boolalpha;
