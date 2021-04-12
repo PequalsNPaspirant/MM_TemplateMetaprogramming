@@ -101,7 +101,7 @@ namespace mm {
 		static bool addTask(const std::string& name, ExplicitFunType task)
 		{
 			CustomTaskExecutor_v1& inst = getInstance();
-			//std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) });
+			//std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) }); //does not work on gcc
 			auto res = inst.taskMap_.insert(typename MapType::value_type( name, std::move(task) ));
 			if (!res.second)
 				return false;
@@ -142,7 +142,7 @@ namespace mm {
 		static bool addTask(const std::string& name, T task)
 		{
 			CustomTaskExecutor_v2& inst = getInstance();
-			//std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) });
+			//std::pair<MapType::iterator, bool> res = inst.taskMap_.insert(MapType::value_type{ name, std::move(task) }); //does not work on gcc
 			auto res = inst.taskMap_.insert(typename MapType::value_type( name, std::move(task) ));
 			if (!res.second)
 				return false;
