@@ -32,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\..\%40_Programming\Everything\MM_TemplateMetaprogramming\src\TemplateMetaprogramming\MM_Any.h" />
+    <ClInclude Include="..\..\..\..\..\..\..\%40_Programming\Everything\MM_TemplateMetaprogramming\src\TemplateMetaprogramming\TMP_CustomTaskExecutor.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_tuple.h" />
