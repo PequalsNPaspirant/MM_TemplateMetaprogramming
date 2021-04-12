@@ -42,7 +42,7 @@
     <ClCompile Include="..\..\..\..\src\_MM_TemplateMetaprogramming_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\%40_Programming\Everything\MM_TemplateMetaprogramming\src\TemplateMetaprogramming\MM_Any.cpp">
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\MM_Any.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,10 +62,10 @@
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\%40_Programming\Everything\MM_TemplateMetaprogramming\src\TemplateMetaprogramming\MM_Any.h">
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\MM_Any.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\..\%40_Programming\Everything\MM_TemplateMetaprogramming\src\TemplateMetaprogramming\TMP_CustomTaskExecutor.h">
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
