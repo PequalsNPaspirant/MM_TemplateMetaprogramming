@@ -16,7 +16,8 @@ obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_tuple.o: src/Tem
 obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_using.o: src/TemplateMetaprogramming/TemplateMetaProgramming_using.cpp
 
 obj/windows_gcc/TemplateMetaprogramming/TMP_CustomTaskExecutor.o: src/TemplateMetaprogramming/TMP_CustomTaskExecutor.cpp \
- src/MM_UnitTestFramework/MM_UnitTestFramework.h
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h \
+ src/TemplateMetaprogramming/TMP_CustomTaskExecutor.h
 
 obj/windows_gcc/TemplateMetaprogramming/TMP_type_traits.o: src/TemplateMetaprogramming/TMP_type_traits.cpp \
  src/TemplateMetaprogramming/TMP_type_traits.h \
