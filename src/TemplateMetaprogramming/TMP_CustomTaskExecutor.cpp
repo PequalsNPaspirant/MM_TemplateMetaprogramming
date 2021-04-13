@@ -100,6 +100,29 @@ namespace mm {
 		return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
 	};
 	
+	template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename... ExplicitFunTypeOrArgs>
+	struct TestFunctionStructHelper
+	{
+		template<typename... Args>
+		static RetType testFunctionHelper(bool& success, const std::string& funName, Args... args)
+		{
+			RetType retVal;
+			success = CustomTaskExecutor<RetType, ExplicitFunTypeOrArgs...>::runTaskNoThrow(retVal, funName, args...);
+			return retVal;
+		}
+	};
+
+	//Partial specialization for RetType = void
+	template<template<typename... Args> class CustomTaskExecutor, typename... ExplicitFunTypeOrArgs>
+	struct TestFunctionStructHelper<CustomTaskExecutor, void, ExplicitFunTypeOrArgs...>
+	{
+		template<typename... Args>
+		static void testFunctionHelper(bool& success, const std::string& funName, Args... args)
+		{
+			success = CustomTaskExecutor<void, ExplicitFunTypeOrArgs...>::runTaskNoThrow(funName, args...);
+			return;
+		}
+	};
 
 	template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename... ExplicitFunTypeOrArgs>
 	struct TestFunctionStruct
@@ -119,7 +142,8 @@ namespace mm {
 			std::cout << "\n" << "runTask: "; retVal1.assign(lambda1); std::cout << " retVal1: '" << retVal1.toString() << "'";
 			bool success3 = false;
 			auto lambda2 = [=, &success3]() {
-				return CustomTaskExecutor<RetType, ExplicitFunTypeOrArgs...>::runTaskNoThrow(success3, funName, args...);
+				//return CustomTaskExecutor<RetType, ExplicitFunTypeOrArgs...>::runTaskNoThrow(success3, funName, args...);
+				return TestFunctionStructHelper<CustomTaskExecutor, RetType, ExplicitFunTypeOrArgs...>::testFunctionHelper(success3, funName, args...);
 			};
 			std::cout << "\n" << "runTaskNoThrow: "; retVal2.assign(lambda2); std::cout << " retVal2: '" << retVal2.toString() << "' success3: " << success3;
 

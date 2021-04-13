@@ -13,7 +13,7 @@
 
 namespace mm {
 
-	template<typename T>
+	template<typename RetType>
 	class RetVal_v1
 	{
 	public:
@@ -27,24 +27,24 @@ namespace mm {
 		RetVal_v1& operator=(const RetVal_v1&) = delete;
 		RetVal_v1& operator=(RetVal_v1&&) = delete;
 
-		T get()
+		RetType get()
 		{
 			return val_;
 		}
 
-		bool operator==(const RetVal_v1<T>& rhs)
+		bool operator==(const RetVal_v1<RetType>& rhs)
 		{
 			return val_ == rhs.val_;
 		}
 
-		bool operator==(const T& rhsVal)
+		bool operator==(const RetType& rhsVal)
 		{
 			return val_ == rhsVal;
 		}
 
-		template<typename U, std::enable_if_t<!std::is_same_v<T, U>, void>* dummy = nullptr>
+		template<typename U, std::enable_if_t<!std::is_same_v<RetType, U>, void>* dummy = nullptr>
 		//bool operator==(const RetVal_v1<U>& rhs)
-		bool operator==(const U& rhs) //Ignore all other types than T and RetVal_v1<T>
+		bool operator==(const U& rhs) //Ignore all other types than RetType and RetVal_v1<RetType>
 		{
 			return false;
 		}
@@ -63,7 +63,7 @@ namespace mm {
 		}
 
 	private:
-		T val_;
+		RetType val_;
 	};
 
 	template<>
@@ -112,30 +112,44 @@ namespace mm {
 		template<typename... Args>
 		static RetType runTask(const std::string& name, Args... args)
 		{
-			RetVal_v1<RetType> retVal;
 			CustomTaskExecutor_v1& inst = getInstance();
 			auto it = inst.taskMap_.find(name);
 			if (it == inst.taskMap_.end())
-				return retVal.get();
+				throw std::runtime_error{ "Task '" + name + "' is not added" };
 
 			return it->second(args...);
 		}
 
-		template<typename... Args>
-		static RetType runTaskNoThrow(bool& success, const std::string& name, Args... args)
+		template<typename RetTypeExpected, typename... Args>
+		static bool runTaskNoThrow(RetTypeExpected& retValEx, const std::string& name, Args... args)
 		{
-			RetVal_v1<RetType> retVal;
 			try
 			{
+				RetVal_v1<RetType> retVal;
 				retVal.assign([=]() { return runTask(name, args...); });
-				success = true;
+				retValEx = std::move(retVal.get());
 			}
 			catch (...)
 			{
-				success = false;
+				return false;
 			}
 
-			return retVal.get();
+			return true;
+		}
+
+		template<typename... Args>
+		static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+		{
+			try
+			{
+				runTask(name, args...);
+			}
+			catch (...)
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 	private:
@@ -169,29 +183,43 @@ namespace mm {
 
 		static RetType runTask(const std::string& name, Args... args)
 		{
-			RetVal_v1<RetType> retVal;
 			CustomTaskExecutor_v2& inst = getInstance();
 			auto it = inst.taskMap_.find(name);
 			if (it == inst.taskMap_.end())
-				return retVal.get();
+				throw std::runtime_error{ "Task '" + name + "' is not added" };
 
 			return it->second(args...);
 		}
 
-		static RetType runTaskNoThrow(bool& success, const std::string& name, Args... args)
+		template<typename RetTypeExpected>
+		static bool runTaskNoThrow(RetTypeExpected& retValEx, const std::string& name, Args... args)
 		{
-			RetVal_v1<RetType> retVal;
 			try
 			{
+				RetVal_v1<RetType> retVal;
 				retVal.assign([=]() { return runTask(name, args...); });
-				success = true;
+				retValEx = std::move(retVal.get());
 			}
 			catch (...)
 			{
-				success = false;
+				return false;
 			}
 
-			return retVal.get();
+			return true;
+		}
+
+		static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+		{
+			try
+			{
+				runTask(name, args...);
+			}
+			catch (...)
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 	private:
@@ -223,22 +251,22 @@ namespace mm {
 			virtual ~TaskObject() {} //Need implementation for pure virtual destructor
 		};
 
-		template<typename T>
+		template<typename TaskType>
 		class TaskObjectImpl : public TaskObject
 		{
 		public:
-			TaskObjectImpl(T&& task)
-				: task_{ std::forward<T>(task) }
+			TaskObjectImpl(TaskType&& task)
+				: task_{ std::forward<TaskType>(task) }
 			{}
 			~TaskObjectImpl() override = default;
 
-			T getTask()
+			TaskType getTask()
 			{
 				return task_;
 			}
 
 		private:
-			T task_;
+			TaskType task_;
 		};
 
 		using MapType = std::unordered_map<std::string, std::shared_ptr<TaskObject>>;
@@ -267,33 +295,54 @@ namespace mm {
 			template<typename... Args>
 			static RetType runTask(const std::string& name, Args... args)
 			{
+				return getTask(name)(args...);
+			}
+
+			template<typename RetTypeExpected, typename... Args>
+			static bool runTaskNoThrow(RetTypeExpected& retValEx, const std::string& name, Args... args)
+			{
+				try
+				{
+					RetVal_v1<RetType> retVal;
+					retVal.assign([=]() { return Task::runTask(name, args...); });
+					retValEx = std::move(retVal.get());
+				}
+				catch (...)
+				{
+					return false;
+				}
+
+				return true;
+			}
+
+			template<typename... Args>
+			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+			{
+				try
+				{
+					Task::runTask(name, args...);
+				}
+				catch (...)
+				{
+					return false;
+				}
+
+				return true;
+			}
+
+		private:
+			static ExplicitFunType getTask(const std::string& name)
+			{
 				CustomTaskExecutor_v3& inst = CustomTaskExecutor_v3::getInstance();
 				MapType::iterator it = inst.taskMap_.find(name);
 				if (it == inst.taskMap_.end())
-					throw std::runtime_error{ "Task of relevant type is not available" };
+					throw std::runtime_error{ "Task '" + name + "' is not added" };
 
 				auto ptrTaskImpl = std::dynamic_pointer_cast<TargetType>(it->second);
 				if (!ptrTaskImpl)
 					throw std::runtime_error{ "Either return type or the arguments to task are not maching" };
 
-				return ptrTaskImpl->getTask()(args...);
-			}
-
-			template<typename... Args>
-			static RetType runTaskNoThrow(bool& success, const std::string& name, Args... args)
-			{
-				RetVal_v1<RetType> retVal;
-				try
-				{
-					retVal.assign([=]() { return Task::runTask(name, args...); });
-					success = true;
-				}
-				catch (...)
-				{
-					success = false;
-				}
-
-				return retVal.get();
+				return ptrTaskImpl->getTask();
 			}
 		};
 	};
@@ -316,22 +365,22 @@ namespace mm {
 			virtual ~TaskObject() {} //Need implementation for pure virtual destructor
 		};
 
-		template<typename T>
+		template<typename TaskType>
 		class TaskObjectImpl : public TaskObject
 		{
 		public:
-			TaskObjectImpl(T&& task)
-				: task_{ std::forward<T>(task) }
+			TaskObjectImpl(TaskType&& task)
+				: task_{ std::forward<TaskType>(task) }
 			{}
 			~TaskObjectImpl() override = default;
 
-			T getTask()
+			TaskType getTask()
 			{
 				return task_;
 			}
 
 		private:
-			T task_;
+			TaskType task_;
 		};
 
 		using MapType = std::unordered_map<std::string, std::shared_ptr<TaskObject>>;
@@ -360,32 +409,53 @@ namespace mm {
 
 			static RetType runTask(const std::string& name, Args... args)
 			{
+				return getTask(name)(args...);
+			}
+
+			template<typename RetTypeExpected>
+			static bool runTaskNoThrow(RetTypeExpected& retValEx, const std::string& name, Args... args)
+			{
+				try
+				{
+					RetVal_v1<RetType> retVal;
+					retVal.assign([=]() { return Task::runTask(name, args...); });
+					retValEx = std::move(retVal.get());
+				}
+				catch (...)
+				{
+					return false;
+				}
+
+				return true;
+			}
+
+			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+			{
+				try
+				{
+					Task::runTask(name, args...);
+				}
+				catch (...)
+				{
+					return false;
+				}
+
+				return true;
+			}
+
+		private:
+			static FunType getTask(const std::string& name)
+			{
 				CustomTaskExecutor_v4& inst = CustomTaskExecutor_v4::getInstance();
 				MapType::iterator it = inst.taskMap_.find(name);
 				if (it == inst.taskMap_.end())
-					throw std::runtime_error{ "Task of relevant type is not available" };
+					throw std::runtime_error{ "Task '" + name + "' is not added" };
 
 				auto ptrTaskImpl = std::dynamic_pointer_cast<TargetType>(it->second);
 				if (!ptrTaskImpl)
 					throw std::runtime_error{ "Either return type or the arguments to task are not maching" };
 
-				return ptrTaskImpl->getTask()(args...);
-			}
-
-			static RetType runTaskNoThrow(bool& success, const std::string& name, Args... args)
-			{
-				RetVal_v1<RetType> retVal;
-				try
-				{
-					retVal.assign([=]() { return Task::runTask(name, args...); });
-					success = true;
-				}
-				catch (...)
-				{
-					success = false;
-				}
-
-				return retVal.get();
+				return ptrTaskImpl->getTask();
 			}
 		};
 	
