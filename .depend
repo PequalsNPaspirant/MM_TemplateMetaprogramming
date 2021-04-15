@@ -19,6 +19,10 @@ obj/windows_gcc/TemplateMetaprogramming/TMP_CustomTaskExecutor.o: src/TemplateMe
  src/MM_UnitTestFramework/MM_UnitTestFramework.h \
  src/TemplateMetaprogramming/TMP_CustomTaskExecutor.h
 
+obj/windows_gcc/TemplateMetaprogramming/TMP_CustomTaskExecutor_v5.o: src/TemplateMetaprogramming/TMP_CustomTaskExecutor_v5.cpp \
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h \
+ src/TemplateMetaprogramming/TMP_CustomTaskExecutor_v5.h
+
 obj/windows_gcc/TemplateMetaprogramming/TMP_type_traits.o: src/TemplateMetaprogramming/TMP_type_traits.cpp \
  src/TemplateMetaprogramming/TMP_type_traits.h \
  src/MM_UnitTestFramework/MM_UnitTestFramework.h

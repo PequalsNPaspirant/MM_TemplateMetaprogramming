@@ -128,7 +128,7 @@ namespace mm {
 	struct TestFunctionStruct
 	{
 		template<typename ActualFunType, typename... Args>
-		static void testFunction(const std::string& funName, ActualFunType&& task, Args... args)
+		static void testFunction(const std::string& funName, ActualFunType task, Args... args)
 		{
 			bool success1 = false;
 			bool success2 = false;
@@ -198,7 +198,7 @@ namespace mm {
 		using FunType7 = std::function<std::string(const std::string&, double, long long)>;
 		using FunType8 = decltype(cStyleFunStringConstRefStringDoubleLonglong);
 
-#if defined(_MSC_VER)
+//#if defined(_MSC_VER)
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType1>::testFunction(funName, cStyleFunVoidVoid);
 		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType2>::testFunction(funName, cStyleFunVoidVoid); //Error while inserting into unordered_map: No constructor could take the source type, or constructor overload resolution was ambiguous
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType3>::testFunction(funName, cStyleFunVoidInt, intIn);
@@ -207,7 +207,7 @@ namespace mm {
 		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType6>::testFunction(funName, cStyleFunStringDouble, dIn);
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType7>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
 		//incrementInput(); TestFunctionStruct<CustomTaskExecutor, std::string, FunType8>::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
-#endif
+//#endif
 
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType1>::testFunction(funName, Functor{});
 		incrementInput(); TestFunctionStruct<CustomTaskExecutor, void, FunType3>::testFunction(funName, Functor{}, intIn);
