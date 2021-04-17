@@ -30,13 +30,31 @@ namespace mm {
 		std::string cStyleFunStringDouble(double d)
 		{
 			std::cout << "std::string cStyleFunStringDouble(double d) Args: d: " << d;
-			return std::string{ "Args: " } +std::to_string(d);
+			return std::string{ "Args: " } + std::to_string(d);
 		}
 		std::string cStyleFunStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll)
 		{
 			std::cout << "std::string cStyleFunStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
-			return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
+			return std::string{ "Args: " } + s + "," + std::to_string(d) + "," + std::to_string(ll);
 		}
+		std::string cStyleFunStrStrConstStrRefStrConstRefStrRValRefStr(
+			std::string s, const std::string cs, std::string& rs, const std::string& crs, std::string&& rvrs)
+		{
+			std::cout << "std::string cStyleFunStrStrConstStrRefStrConstRefStrRValRefStr("
+				<< "std::string s, const std::string cs, std::string& rs, const std::string& crs, std::string&& rvrs) Args:"
+				<< " s: " << s
+				<< " cs: " << cs
+				<< " rs: " << rs
+				<< " crs: " << crs
+				<< " rvrs: " << rvrs;
+			s += "-changed";
+			//cs += "-changed";
+			rs += "-changed";
+			//crs += "-changed";
+			std::string sCopy = std::move(rvrs);
+			return std::string{ "Args: " } + s + "," + cs + "," + rs + "," + crs + "," + rvrs;
+		}
+
 
 		//functors
 		class Functor
@@ -102,55 +120,81 @@ namespace mm {
 			return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
 		};
 
-		template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename... ExplicitFunTypeOrArgs>
+
+
+
+		template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename... Args>
 		struct TestFunctionStructHelper
 		{
-			template<typename... Args>
-			static RetType testFunctionHelper(bool& success, const std::string& funName, Args... args)
+			static RetVal_v1<RetType> runTaskHelper(const std::string& funName, Args... args)
+			{
+				RetType retVal = CustomTaskExecutor<RetType, Args...>::runTask(funName, std::forward<Args>(args)...);
+				return RetVal_v1<RetType>{ retVal };
+			}
+
+			static RetVal_v1<RetType> runTaskNoThrowHelper(bool& success, const std::string& funName, Args... args)
 			{
 				RetType retVal;
-				success = CustomTaskExecutor<RetType, ExplicitFunTypeOrArgs...>::runTaskNoThrow(funName, retVal, args...);
-				return retVal;
+				success = CustomTaskExecutor<RetType, Args...>::runTaskNoThrow(funName, retVal, std::forward<Args>(args)...);
+				return RetVal_v1<RetType>{ retVal };
+			}
+
+			template<typename F>
+			static RetVal_v1<RetType> directFunCallHelper(F task, Args... args)
+			{
+				RetType retVal = task(std::forward<Args>(args)...);
+				return RetVal_v1<RetType>{ retVal };
 			}
 		};
 
 		//Partial specialization for RetType = void
-		template<template<typename... Args> class CustomTaskExecutor, typename... ExplicitFunTypeOrArgs>
-		struct TestFunctionStructHelper<CustomTaskExecutor, void, ExplicitFunTypeOrArgs...>
+		template<template<typename... Args> class CustomTaskExecutor, typename... Args>
+		struct TestFunctionStructHelper<CustomTaskExecutor, void, Args...>
 		{
-			template<typename... Args>
-			static void testFunctionHelper(bool& success, const std::string& funName, Args... args)
+			static RetVal_v1<void> runTaskHelper(const std::string& funName, Args... args)
 			{
-				success = CustomTaskExecutor<void, ExplicitFunTypeOrArgs...>::runTaskNoThrow(funName, args...);
-				return;
+				CustomTaskExecutor<void, Args...>::runTask(funName, std::forward<Args>(args)...);
+				return RetVal_v1<void>{};
+			}
+
+			static RetVal_v1<void> runTaskNoThrowHelper(bool& success, const std::string& funName, Args... args)
+			{
+				success = CustomTaskExecutor<void, Args...>::runTaskNoThrow(funName, std::forward<Args>(args)...);
+				return RetVal_v1<void>{};
+			}
+
+			template<typename F>
+			static RetVal_v1<void> directFunCallHelper(F task, Args... args)
+			{
+				task(std::forward<Args>(args)...);
+				return RetVal_v1<void>{};
 			}
 		};
 
-		template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename... ExplicitFunTypeOrArgs>
+		template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename... Args>
 		struct TestFunctionStruct
 		{
-			template<typename ActualFunType, typename... Args>
+			template<typename ActualFunType>
 			static void testFunction(const std::string& funName, ActualFunType task, Args... args)
 			{
 				bool success1 = false;
 				bool success2 = false;
-				RetVal_v1<RetType> retVal1;
-				RetVal_v1<RetType> retVal2;
 
 				std::cout << "\n\n" << funName << ":";
-				std::cout << "\n" << "addTask: "; success1 = CustomTaskExecutor<RetType, ExplicitFunTypeOrArgs...>::addTask(funName, task); std::cout << " success1: " << success1;
-				std::cout << "\n" << "addTask: "; success2 = CustomTaskExecutor<RetType, ExplicitFunTypeOrArgs...>::addTask(funName, task); std::cout << " success2: " << success2;
-				auto lambda1 = [=]() { return CustomTaskExecutor<RetType, ExplicitFunTypeOrArgs...>::runTask(funName, args...); };
-				std::cout << "\n" << "runTask: "; retVal1.assign(lambda1); std::cout << " retVal1: '" << retVal1.toString() << "'";
+				std::cout << "\n" << "addTask: "; success1 = CustomTaskExecutor<RetType, Args...>::addTask(funName, task); std::cout << " success1: " << success1;
+				std::cout << "\n" << "addTask: "; success2 = CustomTaskExecutor<RetType, Args...>::addTask(funName, task); std::cout << " success2: " << success2;
+				
+				std::cout << "\n" << "runTask: ";
+				RetVal_v1<RetType> retVal1 = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::runTaskHelper(funName, std::forward<Args>(args)...);
+				std::cout << " retVal1: '" << retVal1.toString() << "'";
+				
 				bool success3 = false;
-				auto lambda2 = [=, &success3]() {
-					//return CustomTaskExecutor<RetType, ExplicitFunTypeOrArgs...>::runTaskNoThrow(success3, funName, args...);
-					return TestFunctionStructHelper<CustomTaskExecutor, RetType, ExplicitFunTypeOrArgs...>::testFunctionHelper(success3, funName, args...);
-				};
-				std::cout << "\n" << "runTaskNoThrow: "; retVal2.assign(lambda2); std::cout << " retVal2: '" << retVal2.toString() << "' success3: " << success3;
+				std::cout << "\n" << "runTaskNoThrow: ";
+				RetVal_v1<RetType> retVal2 = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::runTaskNoThrowHelper(success3, funName, std::forward<Args>(args)...);
+				std::cout << " retVal2: '" << retVal2.toString() << "' success3: " << success3;
 
-				RetVal_v1<RetType> expectedOutput;
-				std::cout << "\n" << "run actual task to get expected output: "; expectedOutput.assign([=]() { return task(args...); });
+				std::cout << "\n" << "run actual task to get expected output: ";
+				RetVal_v1<RetType> expectedOutput = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::directFunCallHelper(task, std::forward<Args>(args)...);
 
 				cout << "\n\n";
 				MM_EXPECT_TRUE(success1 == true);
@@ -162,7 +206,6 @@ namespace mm {
 			}
 		};
 
-
 		template<template<typename... Args> class CustomTaskExecutor>
 		void testCustomTaskExecutor_v2v4()
 		{
@@ -173,6 +216,11 @@ namespace mm {
 			long long llIn = 0;
 			double dIn = 1.000;
 			std::string strIn{ "aa" };
+			std::string s{ "s-aa" };
+			const std::string cs{ "cs-aa" };
+			std::string rs{ "rs-aa" };
+			std::string crs{ "crs-aa" };
+			//std::string rvrs{ "rvrs-aa" };
 
 			auto incrementInput = [&]() {
 				intIn += 1;
@@ -195,12 +243,14 @@ namespace mm {
 			using TestFunctionStruct2 = TestFunctionStruct<CustomTaskExecutor, void, int>;
 			using TestFunctionStruct3 = TestFunctionStruct<CustomTaskExecutor, std::string, double>;
 			using TestFunctionStruct4 = TestFunctionStruct<CustomTaskExecutor, std::string, const std::string&, double, long long>;
+			using TestFunctionStruct5 = TestFunctionStruct<CustomTaskExecutor, std::string, std::string, const std::string, std::string&, const std::string&, std::string&&>;
 
 			//#if defined(_MSC_VER)
 			incrementInput(); TestFunctionStruct1::testFunction(funName, cStyleFunVoidVoid);
 			incrementInput(); TestFunctionStruct2::testFunction(funName, cStyleFunVoidInt, intIn);
 			incrementInput(); TestFunctionStruct3::testFunction(funName, cStyleFunStringDouble, dIn);
 			incrementInput(); TestFunctionStruct4::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			incrementInput(); TestFunctionStruct5::testFunction(funName, cStyleFunStrStrConstStrRefStrConstRefStrRValRefStr, s, cs, rs, crs, "rvrs");
 			//#endif
 
 			incrementInput(); TestFunctionStruct1::testFunction(funName, Functor{});
@@ -222,6 +272,27 @@ namespace mm {
 		void testAllCustomTaskExecutorVersions_v5()
 		{
 			testCustomTaskExecutor_v2v4<CustomTaskExecutor_v5::Task>();
+
+			std::cout << std::boolalpha;
+			std::string funName;
+			int funIndex = 0;
+			int intIn = 0;
+			long long llIn = 0;
+			double dIn = 1.000;
+			std::string strIn{ "aa" };
+			std::string s{ "s-aa" };
+			const std::string cs{ "cs-aa" };
+			std::string rs{ "rs-aa" };
+			const std::string crs{ "crs-aa" };
+			//std::string rvrs{ "rvrs-aa" };
+
+			CustomTaskExecutor_v5::Task<std::string, double>::addTask("fun1", cStyleFunStringDouble);
+			s = CustomTaskExecutor_v5::Task<std::string, double>::runTask("fun1", dIn);
+
+			CustomTaskExecutor_v5::Task<std::string, std::string, const std::string, std::string&, const std::string&, std::string&&>::addTask("fun2", cStyleFunStrStrConstStrRefStrConstRefStrRValRefStr);
+			s = CustomTaskExecutor_v5::Task<std::string, std::string, const std::string, std::string&, const std::string&, std::string&&>::runTask("fun2", s, cs, rs, crs, "rvrs");
+
+			std::cout << "\nFinished";
 		}
 	}
 

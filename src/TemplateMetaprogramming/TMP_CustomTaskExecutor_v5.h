@@ -18,12 +18,12 @@ namespace mm {
 	{
 	public:
 		RetVal_v1() {}
-		//RetVal_v1(const T& val)
-		//	: val_{ val }
-		//{}
+		RetVal_v1(const RetType& val)
+			: val_{ val }
+		{}
 
-		RetVal_v1(const RetVal_v1&) = default;
-		RetVal_v1(RetVal_v1&&) = delete;
+		RetVal_v1(const RetVal_v1&) = delete;
+		RetVal_v1(RetVal_v1&&) = default;
 		RetVal_v1& operator=(const RetVal_v1&) = delete;
 		RetVal_v1& operator=(RetVal_v1&&) = delete;
 
@@ -53,6 +53,12 @@ namespace mm {
 		void assign(F fun)
 		{
 			val_ = fun();
+		}
+
+		template<typename F, typename... Args>
+		void assign(F fun, const std::string& name, Args... args)
+		{
+			val_ = fun(name, std::forward<Args>(args)...);
 		}
 
 		std::string toString()
@@ -86,6 +92,12 @@ namespace mm {
 			task();
 		}
 
+		template<typename F, typename... Args>
+		void assign(F fun, const std::string& name, Args... args)
+		{
+			fun(name, std::forward<Args>(args)...);
+		}
+
 		std::string toString()
 		{
 			return "";
@@ -114,8 +126,8 @@ namespace mm {
 		class TaskObjectImpl : public TaskObject
 		{
 		public:
-			TaskObjectImpl(TaskType&& task)
-				: task_{ std::forward<TaskType>(task) }
+			TaskObjectImpl(TaskType task)
+				: task_{ task }
 			{}
 			~TaskObjectImpl() override = default;
 
@@ -147,7 +159,7 @@ namespace mm {
 				if (ptrTask)
 					return false;
 
-				ptrTask = std::make_shared<TargetType>(std::move(task));
+				ptrTask = std::make_shared<TargetType>(task);
 				return true;
 			}
 
@@ -172,27 +184,27 @@ namespace mm {
 		class Task : public TaskBase<RetType, Args...>
 		{
 		public:
-			static RetType runTask(const std::string& name, const Args&... args)
-			{
-				return TaskBase<RetType, Args...>::getTask(name)(args...);
-			}
+			//static RetType runTask(const std::string& name, const Args&... args)
+			//{
+			//	return TaskBase<RetType, Args...>::getTask(name)(args...);
+			//}
 
-			static RetType runTask(const std::string& name, Args&&... args)
+			static RetType runTask(const std::string& name, Args... args)
 			{
 				return TaskBase<RetType, Args...>::getTask(name)(forward<Args>(args)...);
 			}
 
-			template<typename LocalRetType>
-			static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal, const Args&... args)
-			{
-				try { retVal = TaskBase<RetType, Args...>::getTask(name)(args...); }
-				catch (...) { return false; }
+			//template<typename LocalRetType>
+			//static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal, const Args&... args)
+			//{
+			//	try { retVal = TaskBase<RetType, Args...>::getTask(name)(args...); }
+			//	catch (...) { return false; }
 
-				return true;
-			}
+			//	return true;
+			//}
 
 			template<typename LocalRetType>
-			static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal, Args&&... args)
+			static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal, Args... args)
 			{
 				try { retVal = TaskBase<RetType, Args...>::getTask(name)(forward<Args>(args)...); }
 				catch (...) { return false; }
@@ -200,15 +212,15 @@ namespace mm {
 				return true;
 			}
 
-			static bool runTaskNoThrow(const std::string& name, const Args&... args) //This version is called for return type: void
-			{
-				try { TaskBase<RetType, Args...>::getTask(name)(args...); }
-				catch (...) { return false; }
+			//static bool runTaskNoThrow(const std::string& name, const Args&... args) //This version is called for return type: void
+			//{
+			//	try { TaskBase<RetType, Args...>::getTask(name)(args...); }
+			//	catch (...) { return false; }
 
-				return true;
-			}
+			//	return true;
+			//}
 
-			static bool runTaskNoThrow(const std::string& name, Args&&... args) //This version is called for return type: void
+			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
 			{
 				try { TaskBase<RetType, Args...>::getTask(name)(forward<Args>(args)...); }
 				catch (...) { return false; }
