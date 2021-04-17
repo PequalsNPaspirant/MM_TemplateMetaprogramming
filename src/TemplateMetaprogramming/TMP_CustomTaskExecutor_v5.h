@@ -22,7 +22,7 @@ namespace mm {
 			: val_{ val }
 		{}
 
-		RetVal_v1(const RetVal_v1&) = delete;
+		RetVal_v1(const RetVal_v1&) = default;
 		RetVal_v1(RetVal_v1&&) = default;
 		RetVal_v1& operator=(const RetVal_v1&) = delete;
 		RetVal_v1& operator=(RetVal_v1&&) = delete;

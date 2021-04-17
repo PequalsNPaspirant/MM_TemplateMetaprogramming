@@ -174,36 +174,82 @@ namespace mm {
 		template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename... Args>
 		struct TestFunctionStruct
 		{
-			template<typename ActualFunType>
-			static void testFunction(const std::string& funName, ActualFunType task, Args... args)
+			static RetVal_v1<RetType> testRunTask(const std::string& funName, Args... args)
 			{
-				bool success1 = false;
-				bool success2 = false;
+				std::cout << "\n" << "runTask: ";
+				RetVal_v1<RetType> retVal = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::runTaskHelper(funName, std::forward<Args>(args)...);
+				std::cout << " retVal: '" << retVal.toString() << "'";
+				return retVal;
+			}
+
+			static RetVal_v1<RetType> testRunTaskNoThrow(bool& success3, const std::string& funName, Args... args)
+			{
+				success3 = false;
+				std::cout << "\n" << "runTaskNoThrow: ";
+				RetVal_v1<RetType> retValNoThrow = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::runTaskNoThrowHelper(success3, funName, std::forward<Args>(args)...);
+				std::cout << " retValNoThrow: '" << retValNoThrow.toString() << "' success3: " << success3;
+				return retValNoThrow;
+			}
+
+			template<typename ActualFunType>
+			static RetVal_v1<RetType> testAddTaskAndDirectFunCall(bool& success1, bool& success2, const std::string& funName, ActualFunType task, Args... args)
+			{
+				success1 = false;
+				success2 = false;
 
 				std::cout << "\n\n" << funName << ":";
 				std::cout << "\n" << "addTask: "; success1 = CustomTaskExecutor<RetType, Args...>::addTask(funName, task); std::cout << " success1: " << success1;
 				std::cout << "\n" << "addTask: "; success2 = CustomTaskExecutor<RetType, Args...>::addTask(funName, task); std::cout << " success2: " << success2;
-				
-				std::cout << "\n" << "runTask: ";
-				RetVal_v1<RetType> retVal1 = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::runTaskHelper(funName, std::forward<Args>(args)...);
-				std::cout << " retVal1: '" << retVal1.toString() << "'";
-				
-				bool success3 = false;
-				std::cout << "\n" << "runTaskNoThrow: ";
-				RetVal_v1<RetType> retVal2 = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::runTaskNoThrowHelper(success3, funName, std::forward<Args>(args)...);
-				std::cout << " retVal2: '" << retVal2.toString() << "' success3: " << success3;
 
 				std::cout << "\n" << "run actual task to get expected output: ";
-				RetVal_v1<RetType> expectedOutput = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::directFunCallHelper(task, std::forward<Args>(args)...);
+				RetVal_v1<RetType> retValExpected = TestFunctionStructHelper<CustomTaskExecutor, RetType, Args...>::directFunCallHelper(task, std::forward<Args>(args)...);
+				std::cout << " retValExpected: '" << retValExpected.toString() << "'";
 
-				cout << "\n\n";
-				MM_EXPECT_TRUE(success1 == true);
-				MM_EXPECT_TRUE(success2 == false);
-				MM_EXPECT_TRUE(retVal1 == expectedOutput, retVal1.toString(), expectedOutput.toString());
-				MM_EXPECT_TRUE(success3 == true);
-				MM_EXPECT_TRUE(retVal2 == expectedOutput, retVal2.toString(), expectedOutput.toString());
-
+				return retValExpected;
 			}
+		};
+
+		struct InputData
+		{
+			int intIn;
+			long long llIn;
+			double dIn;
+			std::string strIn;
+			std::string s;
+			const std::string cs;
+			//std::string& rs; 
+			std::string rs;
+			const std::string& crs;
+			std::string rvrs;
+
+			bool operator==(const InputData& rhs)
+			{
+				return
+					intIn == rhs.intIn &&
+					llIn == rhs.llIn &&
+					dIn == rhs.dIn &&
+					strIn == rhs.strIn &&
+					s == rhs.s &&
+					cs == rhs.cs &&
+					rs == rhs.rs &&
+					crs == rhs.crs &&
+					rvrs == rhs.rvrs;
+			}
+		};
+
+		template<typename RetType>
+		void verifyResults(bool success1, bool success2, bool success3,
+			RetVal_v1<RetType> retValExpected, RetVal_v1<RetType> retVal, RetVal_v1<RetType> retValNoThrow,
+			InputData in1, InputData in2, InputData in3) 
+		{
+			cout << "\n\n";
+			MM_EXPECT_TRUE(success1 == true);
+			MM_EXPECT_TRUE(success2 == false);
+			MM_EXPECT_TRUE(retVal == retValExpected, retVal.toString(), retValExpected.toString());
+			MM_EXPECT_TRUE(success3 == true);
+			MM_EXPECT_TRUE(retValNoThrow == retValExpected, retValNoThrow.toString(), retValExpected.toString());
+			MM_EXPECT_TRUE(in1 == in2);
+			MM_EXPECT_TRUE(in2 == in3);
 		};
 
 		template<template<typename... Args> class CustomTaskExecutor>
@@ -217,16 +263,12 @@ namespace mm {
 			double dIn = 1.000;
 			std::string strIn{ "aa" };
 			std::string s{ "s-aa" };
-			const std::string cs{ "cs-aa" };
+			std::string cs{ "cs-aa" };
 			std::string rs{ "rs-aa" };
 			std::string crs{ "crs-aa" };
-			//std::string rvrs{ "rvrs-aa" };
+			std::string rvrs{ "rvrs-aa" };
 
-			auto incrementInput = [&]() {
-				intIn += 1;
-				funName = "fun_" + std::to_string(intIn);
-				llIn += 10;
-				dIn += 0.001;
+			auto incrementstring = [](std::string& strIn) {
 				for (int i = static_cast<int>(strIn.length() - 1); i >= 0; --i)
 				{
 					if (strIn[i] < 'z')
@@ -239,34 +281,79 @@ namespace mm {
 				}
 			};
 
+			auto incrementInput = [&]() -> InputData {
+				intIn += 1;
+				funName = "fun_" + std::to_string(intIn);
+				llIn += 10;
+				dIn += 0.001;
+				incrementstring(strIn);
+				incrementstring(s);
+				incrementstring(cs);
+				incrementstring(rs);
+				incrementstring(crs);
+				incrementstring(rvrs);
+
+				return InputData{ intIn, llIn, dIn, strIn, s, cs, rs, crs, rvrs };
+			};
+
 			using TestFunctionStruct1 = TestFunctionStruct<CustomTaskExecutor, void>;
 			using TestFunctionStruct2 = TestFunctionStruct<CustomTaskExecutor, void, int>;
 			using TestFunctionStruct3 = TestFunctionStruct<CustomTaskExecutor, std::string, double>;
 			using TestFunctionStruct4 = TestFunctionStruct<CustomTaskExecutor, std::string, const std::string&, double, long long>;
 			using TestFunctionStruct5 = TestFunctionStruct<CustomTaskExecutor, std::string, std::string, const std::string, std::string&, const std::string&, std::string&&>;
 
-			//#if defined(_MSC_VER)
-			incrementInput(); TestFunctionStruct1::testFunction(funName, cStyleFunVoidVoid);
-			incrementInput(); TestFunctionStruct2::testFunction(funName, cStyleFunVoidInt, intIn);
-			incrementInput(); TestFunctionStruct3::testFunction(funName, cStyleFunStringDouble, dIn);
-			incrementInput(); TestFunctionStruct4::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
-			incrementInput(); TestFunctionStruct5::testFunction(funName, cStyleFunStrStrConstStrRefStrConstRefStrRValRefStr, s, cs, rs, crs, "rvrs");
-			//#endif
+			bool success1, success2, success3;
 
-			incrementInput(); TestFunctionStruct1::testFunction(funName, Functor{});
-			incrementInput(); TestFunctionStruct2::testFunction(funName, Functor{}, intIn);
-			incrementInput(); TestFunctionStruct3::testFunction(funName, Functor{}, dIn);
-			incrementInput(); TestFunctionStruct4::testFunction(funName, Functor{}, strIn, dIn, llIn);
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<void> retValExpected = TestFunctionStruct1::testAddTaskAndDirectFunCall(success1, success2, funName, cStyleFunVoidVoid);
+				RetVal_v1<void> retVal = TestFunctionStruct1::testRunTask(funName);
+				RetVal_v1<void> retValNoThrow = TestFunctionStruct1::testRunTaskNoThrow(success3, funName);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<void> retValExpected = TestFunctionStruct2::testAddTaskAndDirectFunCall(success1, success2, funName, cStyleFunVoidInt, in1.intIn);
+				RetVal_v1<void> retVal = TestFunctionStruct2::testRunTask(funName, in2.intIn);
+				RetVal_v1<void> retValNoThrow = TestFunctionStruct2::testRunTaskNoThrow(success3, funName, in3.intIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct3::testAddTaskAndDirectFunCall(success1, success2, funName, cStyleFunStringDouble, in1.dIn);
+				RetVal_v1<std::string> retVal = TestFunctionStruct3::testRunTask(funName, in2.dIn);
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct3::testRunTaskNoThrow(success3, funName, in3.dIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct4::testAddTaskAndDirectFunCall(success1, success2, funName, cStyleFunStringConstRefStringDoubleLonglong, in1.strIn, in1.dIn, in1.llIn);
+				RetVal_v1<std::string> retVal = TestFunctionStruct4::testRunTask(funName, in2.strIn, in2.dIn, in2.llIn);
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct4::testRunTaskNoThrow(success3, funName, in3.strIn, in3.dIn, in3.llIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct5::testAddTaskAndDirectFunCall(success1, success2, funName, cStyleFunStrStrConstStrRefStrConstRefStrRValRefStr, in1.s, in1.cs, in1.rs, in1.crs, std::move(in1.rvrs));
+				RetVal_v1<std::string> retVal = TestFunctionStruct5::testRunTask(funName, in2.s, in2.cs, in2.rs, in2.crs, std::move(in2.rvrs));
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct5::testRunTaskNoThrow(success3, funName, in3.s, in3.cs, in3.rs, in3.crs, std::move(in3.rvrs));
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
 
-			incrementInput(); TestFunctionStruct1::testFunction(funName, lambdaVoidVoid);
-			incrementInput(); TestFunctionStruct2::testFunction(funName, lambdaVoidInt, intIn);
-			incrementInput(); TestFunctionStruct3::testFunction(funName, lambdaStringDouble, dIn);
-			incrementInput(); TestFunctionStruct4::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			//{ InputData in = incrementInput(); TestFunctionStruct1::testFunction(funName, Functor{}); }
+			//{ InputData in = incrementInput(); TestFunctionStruct2::testFunction(funName, Functor{}, in.intIn); }
+			//{ InputData in = incrementInput(); TestFunctionStruct3::testFunction(funName, Functor{}, in.dIn); }
+			//{ InputData in = incrementInput(); TestFunctionStruct4::testFunction(funName, Functor{}, in.strIn, in.dIn, in.llIn); }
 
-			incrementInput(); TestFunctionStruct1::testFunction(funName, stdFunVoidVoid);
-			incrementInput(); TestFunctionStruct2::testFunction(funName, stdFunVoidInt, intIn);
-			incrementInput(); TestFunctionStruct3::testFunction(funName, stdFunStringDouble, dIn);
-			incrementInput(); TestFunctionStruct4::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
+			//{ InputData in = incrementInput(); TestFunctionStruct1::testFunction(funName, lambdaVoidVoid); }
+			//{ InputData in = incrementInput(); TestFunctionStruct2::testFunction(funName, lambdaVoidInt, in.intIn); }
+			//{ InputData in = incrementInput(); TestFunctionStruct3::testFunction(funName, lambdaStringDouble, in.dIn); }
+			//{ InputData in = incrementInput(); TestFunctionStruct4::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, in.strIn, in.dIn, in.llIn); }
+
+			//{ InputData in = incrementInput(); TestFunctionStruct1::testFunction(funName, stdFunVoidVoid); }
+			//{ InputData in = incrementInput(); TestFunctionStruct2::testFunction(funName, stdFunVoidInt, in.intIn); }
+			//{ InputData in = incrementInput(); TestFunctionStruct3::testFunction(funName, stdFunStringDouble, in.dIn); }
+			//{ InputData in = incrementInput(); TestFunctionStruct4::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, in.strIn, in.dIn, in.llIn); }
 		}
 
 		void testAllCustomTaskExecutorVersions_v5()
@@ -287,10 +374,10 @@ namespace mm {
 			//std::string rvrs{ "rvrs-aa" };
 
 			CustomTaskExecutor_v5::Task<std::string, double>::addTask("fun1", cStyleFunStringDouble);
-			s = CustomTaskExecutor_v5::Task<std::string, double>::runTask("fun1", dIn);
+			std::string s1 = CustomTaskExecutor_v5::Task<std::string, double>::runTask("fun1", dIn);
 
 			CustomTaskExecutor_v5::Task<std::string, std::string, const std::string, std::string&, const std::string&, std::string&&>::addTask("fun2", cStyleFunStrStrConstStrRefStrConstRefStrRValRefStr);
-			s = CustomTaskExecutor_v5::Task<std::string, std::string, const std::string, std::string&, const std::string&, std::string&&>::runTask("fun2", s, cs, rs, crs, "rvrs");
+			std::string s2 = CustomTaskExecutor_v5::Task<std::string, std::string, const std::string, std::string&, const std::string&, std::string&&>::runTask("fun2", s, cs, rs, crs, "rvrs");
 
 			std::cout << "\nFinished";
 		}
