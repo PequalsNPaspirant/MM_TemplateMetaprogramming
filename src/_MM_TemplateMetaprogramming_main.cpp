@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 	MM_RUN_UNIT_TESTS;
 
 	//cout << "\n\n\n" << Timer::getCurrentLocalTimeInNanoSeconds() << " CONGRATULATIONS!!! End of program reached successfully.\n\n\n";
-	cout << "\n\n\n" << " CONGRATULATIONS!!! End of program reached successfully.\n\n\n";
+	cout << "\n\n\n" << "CONGRATULATIONS!!! End of program reached successfully.\n\n\n";
 
 	std::cin.get();
 	return 0;

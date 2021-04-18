@@ -14,7 +14,7 @@
 
 namespace mm {
 
-	// =========== Test functions ===========
+	// =========== Test Functions ===========
 
 	//c-style functions
 	void cStyleFunVoidVoid()
@@ -98,6 +98,88 @@ namespace mm {
 	{
 		std::cout << "std::string lambdaStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
 		return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
+	};
+
+
+	// =========== Helper Classes / Functions ===========
+
+	template<typename RetType>
+	class RetVal_v1
+	{
+	public:
+		RetVal_v1() {}
+		//RetVal_v1(const T& val)
+		//	: val_{ val }
+		//{}
+
+		RetVal_v1(const RetVal_v1&) = default;
+		RetVal_v1(RetVal_v1&&) = delete;
+		RetVal_v1& operator=(const RetVal_v1&) = delete;
+		RetVal_v1& operator=(RetVal_v1&&) = delete;
+
+		RetType get()
+		{
+			return val_;
+		}
+
+		bool operator==(const RetVal_v1<RetType>& rhs)
+		{
+			return val_ == rhs.val_;
+		}
+
+		bool operator==(const RetType& rhsVal)
+		{
+			return val_ == rhsVal;
+		}
+
+		template<typename U, std::enable_if_t<!std::is_same_v<RetType, U>, void>* dummy = nullptr>
+		//bool operator==(const RetVal_v1<U>& rhs)
+		bool operator==(const U& rhs) //Ignore all other types than RetType and RetVal_v1<RetType>
+		{
+			return false;
+		}
+
+		template<typename F>
+		void assign(F fun)
+		{
+			val_ = fun();
+		}
+
+		std::string toString()
+		{
+			stringstream ss;
+			ss << val_;
+			return ss.str();
+		}
+
+	private:
+		RetType val_;
+	};
+
+	template<>
+	class RetVal_v1<void>
+	{
+	public:
+		void get()
+		{
+		}
+
+		template<typename U>
+		bool operator==(const U& rhs)
+		{
+			return true;
+		}
+
+		template<typename F>
+		void assign(F task)
+		{
+			task();
+		}
+
+		std::string toString()
+		{
+			return "";
+		}
 	};
 	
 	template<template<typename... Args> class CustomTaskExecutor, typename RetType, typename... ExplicitFunTypeOrArgs>
