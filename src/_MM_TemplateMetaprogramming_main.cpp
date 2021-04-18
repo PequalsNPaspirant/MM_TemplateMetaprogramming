@@ -15,7 +15,8 @@ namespace mm {
 	MM_DEFINE_FLAG(false, MM_Any_type);
 	MM_DEFINE_FLAG(false, MM_returnTypeCovariance);
 	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v1);
-	MM_DEFINE_FLAG(true, TemplateMetaProgrammingCustomTaskExecutor_v5);
+	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v5);
+	MM_DEFINE_FLAG(true, TemplateMetaProgrammingCustomTaskExecutor_v6);
 }
 
 int main(int argc, char* argv[])

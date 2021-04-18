@@ -48,6 +48,9 @@
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v1to4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v6.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\Templates\Templates.h">
@@ -72,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v1to4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
