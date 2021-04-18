@@ -27,7 +27,7 @@ namespace mm {
 		class TaskObject
 		{
 		public:
-			virtual ~TaskObject() {} //Need implementation for pure virtual destructor
+			virtual ~TaskObject() = default;
 		};
 
 		template<typename TaskType>
@@ -120,7 +120,7 @@ namespace mm {
 				return true;
 			}
 
-			//static bool runTaskNoThrow(const std::string& name, const Args&... args) //This version is called for return type: void
+			//static bool runTaskNoThrow(const std::string& name, const Args&... args) //This version is called for return type 'void' or if someone is not interested in the return value
 			//{
 			//	try { TaskBase<RetType, Args...>::getTask(name)(args...); }
 			//	catch (...) { return false; }
@@ -128,7 +128,7 @@ namespace mm {
 			//	return true;
 			//}
 
-			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type 'void' or if someone is not interested in the return value
 			{
 				try { TaskBase<RetType, Args...>::getTask(name)(forward<Args>(args)...); }
 				catch (...) { return false; }
@@ -156,7 +156,7 @@ namespace mm {
 				return true;
 			}
 
-			static bool runTaskNoThrow(const std::string& name) //This version is called for return type: void
+			static bool runTaskNoThrow(const std::string& name) //This version is called for return type 'void' or if someone is not interested in the return value
 			{
 				try { TaskBase<RetType>::getTask(name)(); }
 				catch (...) { return false; }

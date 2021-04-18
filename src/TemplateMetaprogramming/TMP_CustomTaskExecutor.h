@@ -60,7 +60,7 @@ namespace mm {
 		}
 
 		template<typename... Args>
-		static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+		static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type 'void' or if someone is not interested in the return value
 		{
 			try
 			{
@@ -131,7 +131,7 @@ namespace mm {
 			return true;
 		}
 
-		static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+		static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type 'void' or if someone is not interested in the return value
 		{
 			try
 			{
@@ -171,7 +171,7 @@ namespace mm {
 		class TaskObject
 		{
 		public:
-			virtual ~TaskObject() {} //Need implementation for pure virtual destructor
+			virtual ~TaskObject() = default;
 		};
 
 		template<typename TaskType>
@@ -240,7 +240,7 @@ namespace mm {
 			}
 
 			template<typename... Args>
-			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type 'void' or if someone is not interested in the return value
 			{
 				try
 				{
@@ -286,7 +286,7 @@ namespace mm {
 		class TaskObject
 		{
 		public:
-			virtual ~TaskObject() {} //Need implementation for pure virtual destructor
+			virtual ~TaskObject() = default;
 		};
 
 		template<typename TaskType>
@@ -354,7 +354,7 @@ namespace mm {
 				return true;
 			}
 
-			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type: void
+			static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type 'void' or if someone is not interested in the return value
 			{
 				try
 				{
