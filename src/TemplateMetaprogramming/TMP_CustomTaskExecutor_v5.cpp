@@ -78,6 +78,24 @@ namespace mm {
 				std::cout << "std::string operator()(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
 				return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
 			}
+
+			std::string operator()(
+				std::string s, const std::string cs, std::string& rs, const std::string& crs, std::string&& rvrs)
+			{
+				std::cout << "std::string operator()("
+					<< "std::string s, const std::string cs, std::string& rs, const std::string& crs, std::string&& rvrs) Args:"
+					<< " s: " << s
+					<< " cs: " << cs
+					<< " rs: " << rs
+					<< " crs: " << crs
+					<< " rvrs: " << rvrs;
+				s += "-changed";
+				//cs += "-changed";
+				rs += "-changed";
+				//crs += "-changed";
+				std::string sCopy = std::move(rvrs);
+				return std::string{ "Args: " } +s + "," + cs + "," + rs + "," + crs + "," + rvrs;
+			}
 		};
 
 		//lambdas
@@ -99,25 +117,59 @@ namespace mm {
 			std::cout << "std::string lambdaStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
 			return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
 		};
+		auto lambdaStrStrConstStrRefStrConstRefStrRValRefStr = [](std::string s, const std::string cs, std::string& rs, const std::string& crs, std::string&& rvrs) -> std::string
+		{
+			std::cout << "std::string lambdaStrStrConstStrRefStrConstRefStrRValRefStr("
+				<< "std::string s, const std::string cs, std::string& rs, const std::string& crs, std::string&& rvrs) Args:"
+				<< " s: " << s
+				<< " cs: " << cs
+				<< " rs: " << rs
+				<< " crs: " << crs
+				<< " rvrs: " << rvrs;
+			s += "-changed";
+			//cs += "-changed";
+			rs += "-changed";
+			//crs += "-changed";
+			std::string sCopy = std::move(rvrs);
+			return std::string{ "Args: " } +s + "," + cs + "," + rs + "," + crs + "," + rvrs;
+		};
 
 		//std::functions
 		std::function<void(void)> stdFunVoidVoid = []()
 		{
-			std::cout << "lambdaVoidVoid()";
+			std::cout << "stdFunVoidVoid()";
 		};
 		std::function<void(int)> stdFunVoidInt = [](int n)
 		{
-			std::cout << "lambdaVoidInt(int n) Args: n: " << n;
+			std::cout << "stdFunVoidInt(int n) Args: n: " << n;
 		};
 		std::function<std::string(double)> stdFunStringDouble = [](double d) -> std::string
 		{
-			std::cout << "std::string lambdaStringDouble(double d) Args: d: " << d;
+			std::cout << "std::string stdFunStringDouble(double d) Args: d: " << d;
 			return std::string{ "Args: " } +std::to_string(d);
 		};
-		std::function<std::string(const std::string&, double, long long)> stdFunStringConstRefStringDoubleLonglong = [](const std::string& s, double d, long long ll) -> std::string
+		std::function<std::string(const std::string&, double, long long)> stdFunStringConstRefStringDoubleLonglong 
+			= [](const std::string& s, double d, long long ll) -> std::string
 		{
-			std::cout << "std::string lambdaStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
+			std::cout << "std::string stdFunStringConstRefStringDoubleLonglong(const std::string& s, double d, long long ll) Args: s: " << s << " d: " << d << " ll: " << ll;
 			return std::string{ "Args: " } +s + "," + std::to_string(d) + "," + std::to_string(ll);
+		};
+		std::function<std::string(std::string, const std::string, std::string&, const std::string&, std::string&&)> stdFunStrStrConstStrRefStrConstRefStrRValRefStr
+			= [](std::string s, const std::string cs, std::string& rs, const std::string& crs, std::string&& rvrs) -> std::string
+		{
+			std::cout << "std::string stdFunStrStrConstStrRefStrConstRefStrRValRefStr("
+				<< "std::string s, const std::string cs, std::string& rs, const std::string& crs, std::string&& rvrs) Args:"
+				<< " s: " << s
+				<< " cs: " << cs
+				<< " rs: " << rs
+				<< " crs: " << crs
+				<< " rvrs: " << rvrs;
+			s += "-changed";
+			//cs += "-changed";
+			rs += "-changed";
+			//crs += "-changed";
+			std::string sCopy = std::move(rvrs);
+			return std::string{ "Args: " } +s + "," + cs + "," + rs + "," + crs + "," + rvrs;
 		};
 
 
@@ -396,6 +448,7 @@ namespace mm {
 
 			bool success1, success2, success3;
 
+			//Test c-style functions
 			{
 				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
 				RetVal_v1<void> retValExpected = TestFunctionStruct1::testAddTaskAndDirectFunCall(success1, success2, funName, cStyleFunVoidVoid);
@@ -432,20 +485,117 @@ namespace mm {
 				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
 			}
 
-			//{ InputData in = incrementInput(); TestFunctionStruct1::testFunction(funName, Functor{}); }
-			//{ InputData in = incrementInput(); TestFunctionStruct2::testFunction(funName, Functor{}, in.intIn); }
-			//{ InputData in = incrementInput(); TestFunctionStruct3::testFunction(funName, Functor{}, in.dIn); }
-			//{ InputData in = incrementInput(); TestFunctionStruct4::testFunction(funName, Functor{}, in.strIn, in.dIn, in.llIn); }
+			//Test functors
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<void> retValExpected = TestFunctionStruct1::testAddTaskAndDirectFunCall(success1, success2, funName, Functor{});
+				RetVal_v1<void> retVal = TestFunctionStruct1::testRunTask(funName);
+				RetVal_v1<void> retValNoThrow = TestFunctionStruct1::testRunTaskNoThrow(success3, funName);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<void> retValExpected = TestFunctionStruct2::testAddTaskAndDirectFunCall(success1, success2, funName, Functor{}, in1.intIn);
+				RetVal_v1<void> retVal = TestFunctionStruct2::testRunTask(funName, in2.intIn);
+				RetVal_v1<void> retValNoThrow = TestFunctionStruct2::testRunTaskNoThrow(success3, funName, in3.intIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct3::testAddTaskAndDirectFunCall(success1, success2, funName, Functor{}, in1.dIn);
+				RetVal_v1<std::string> retVal = TestFunctionStruct3::testRunTask(funName, in2.dIn);
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct3::testRunTaskNoThrow(success3, funName, in3.dIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct4::testAddTaskAndDirectFunCall(success1, success2, funName, Functor{}, in1.strIn, in1.dIn, in1.llIn);
+				RetVal_v1<std::string> retVal = TestFunctionStruct4::testRunTask(funName, in2.strIn, in2.dIn, in2.llIn);
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct4::testRunTaskNoThrow(success3, funName, in3.strIn, in3.dIn, in3.llIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct5::testAddTaskAndDirectFunCall(success1, success2, funName, Functor{}, in1.s, in1.cs, in1.rs, in1.crs, std::move(in1.rvrs));
+				RetVal_v1<std::string> retVal = TestFunctionStruct5::testRunTask(funName, in2.s, in2.cs, in2.rs, in2.crs, std::move(in2.rvrs));
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct5::testRunTaskNoThrow(success3, funName, in3.s, in3.cs, in3.rs, in3.crs, std::move(in3.rvrs));
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
 
-			//{ InputData in = incrementInput(); TestFunctionStruct1::testFunction(funName, lambdaVoidVoid); }
-			//{ InputData in = incrementInput(); TestFunctionStruct2::testFunction(funName, lambdaVoidInt, in.intIn); }
-			//{ InputData in = incrementInput(); TestFunctionStruct3::testFunction(funName, lambdaStringDouble, in.dIn); }
-			//{ InputData in = incrementInput(); TestFunctionStruct4::testFunction(funName, lambdaStringConstRefStringDoubleLonglong, in.strIn, in.dIn, in.llIn); }
+			//Test lambdas
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<void> retValExpected = TestFunctionStruct1::testAddTaskAndDirectFunCall(success1, success2, funName, lambdaVoidVoid);
+				RetVal_v1<void> retVal = TestFunctionStruct1::testRunTask(funName);
+				RetVal_v1<void> retValNoThrow = TestFunctionStruct1::testRunTaskNoThrow(success3, funName);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<void> retValExpected = TestFunctionStruct2::testAddTaskAndDirectFunCall(success1, success2, funName, lambdaVoidInt, in1.intIn);
+				RetVal_v1<void> retVal = TestFunctionStruct2::testRunTask(funName, in2.intIn);
+				RetVal_v1<void> retValNoThrow = TestFunctionStruct2::testRunTaskNoThrow(success3, funName, in3.intIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct3::testAddTaskAndDirectFunCall(success1, success2, funName, lambdaStringDouble, in1.dIn);
+				RetVal_v1<std::string> retVal = TestFunctionStruct3::testRunTask(funName, in2.dIn);
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct3::testRunTaskNoThrow(success3, funName, in3.dIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct4::testAddTaskAndDirectFunCall(success1, success2, funName, lambdaStringConstRefStringDoubleLonglong, in1.strIn, in1.dIn, in1.llIn);
+				RetVal_v1<std::string> retVal = TestFunctionStruct4::testRunTask(funName, in2.strIn, in2.dIn, in2.llIn);
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct4::testRunTaskNoThrow(success3, funName, in3.strIn, in3.dIn, in3.llIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct5::testAddTaskAndDirectFunCall(success1, success2, funName, lambdaStrStrConstStrRefStrConstRefStrRValRefStr, in1.s, in1.cs, in1.rs, in1.crs, std::move(in1.rvrs));
+				RetVal_v1<std::string> retVal = TestFunctionStruct5::testRunTask(funName, in2.s, in2.cs, in2.rs, in2.crs, std::move(in2.rvrs));
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct5::testRunTaskNoThrow(success3, funName, in3.s, in3.cs, in3.rs, in3.crs, std::move(in3.rvrs));
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
 
-			//{ InputData in = incrementInput(); TestFunctionStruct1::testFunction(funName, stdFunVoidVoid); }
-			//{ InputData in = incrementInput(); TestFunctionStruct2::testFunction(funName, stdFunVoidInt, in.intIn); }
-			//{ InputData in = incrementInput(); TestFunctionStruct3::testFunction(funName, stdFunStringDouble, in.dIn); }
-			//{ InputData in = incrementInput(); TestFunctionStruct4::testFunction(funName, stdFunStringConstRefStringDoubleLonglong, in.strIn, in.dIn, in.llIn); }
+			//Test std::function
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<void> retValExpected = TestFunctionStruct1::testAddTaskAndDirectFunCall(success1, success2, funName, stdFunVoidVoid);
+				RetVal_v1<void> retVal = TestFunctionStruct1::testRunTask(funName);
+				RetVal_v1<void> retValNoThrow = TestFunctionStruct1::testRunTaskNoThrow(success3, funName);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<void> retValExpected = TestFunctionStruct2::testAddTaskAndDirectFunCall(success1, success2, funName, stdFunVoidInt, in1.intIn);
+				RetVal_v1<void> retVal = TestFunctionStruct2::testRunTask(funName, in2.intIn);
+				RetVal_v1<void> retValNoThrow = TestFunctionStruct2::testRunTaskNoThrow(success3, funName, in3.intIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct3::testAddTaskAndDirectFunCall(success1, success2, funName, stdFunStringDouble, in1.dIn);
+				RetVal_v1<std::string> retVal = TestFunctionStruct3::testRunTask(funName, in2.dIn);
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct3::testRunTaskNoThrow(success3, funName, in3.dIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct4::testAddTaskAndDirectFunCall(success1, success2, funName, stdFunStringConstRefStringDoubleLonglong, in1.strIn, in1.dIn, in1.llIn);
+				RetVal_v1<std::string> retVal = TestFunctionStruct4::testRunTask(funName, in2.strIn, in2.dIn, in2.llIn);
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct4::testRunTaskNoThrow(success3, funName, in3.strIn, in3.dIn, in3.llIn);
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+			{
+				InputData in1 = incrementInput(); InputData in2 = in1; InputData in3 = in1;
+				RetVal_v1<std::string> retValExpected = TestFunctionStruct5::testAddTaskAndDirectFunCall(success1, success2, funName, stdFunStrStrConstStrRefStrConstRefStrRValRefStr, in1.s, in1.cs, in1.rs, in1.crs, std::move(in1.rvrs));
+				RetVal_v1<std::string> retVal = TestFunctionStruct5::testRunTask(funName, in2.s, in2.cs, in2.rs, in2.crs, std::move(in2.rvrs));
+				RetVal_v1<std::string> retValNoThrow = TestFunctionStruct5::testRunTaskNoThrow(success3, funName, in3.s, in3.cs, in3.rs, in3.crs, std::move(in3.rvrs));
+				verifyResults(success1, success2, success3, retValExpected, retVal, retValNoThrow, in1, in2, in3);
+			}
+
 		}
 
 		void testAllCustomTaskExecutorVersions_v5()
