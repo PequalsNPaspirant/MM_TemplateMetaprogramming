@@ -53,8 +53,9 @@ namespace mm {
 			using MapType = std::unordered_map<std::string, std::shared_ptr<TaskObject>>;
 			MapType taskMap_;
 
+		public:
 			template<typename RetType, typename... Args>
-			class TaskBase
+			class Task
 			{
 			public:
 				using FunType = std::function<RetType(Args...)>;
@@ -73,6 +74,29 @@ namespace mm {
 					return true;
 				}
 
+				static RetType runTask(const std::string& name, Args... args)
+				{
+					return getTask(name)(forward<Args>(args)...);
+				}
+
+				template<typename LocalRetType>
+				static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal, Args... args)
+				{
+					try { retVal = getTask(name)(forward<Args>(args)...); }
+					catch (...) { return false; }
+
+					return true;
+				}
+
+				static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type 'void' or if someone is not interested in the return value
+				{
+					try { getTask(name)(forward<Args>(args)...); }
+					catch (...) { return false; }
+
+					return true;
+				}
+
+			private:
 				static FunType getTask(const std::string& name)
 				{
 					CustomTaskExecutor& inst = CustomTaskExecutor::getInstance();
@@ -86,87 +110,7 @@ namespace mm {
 
 					return ptrTaskImpl->getTask();
 				}
-
 			};
-
-		public:
-			template<typename RetType, typename... Args>
-			class Task : public TaskBase<RetType, Args...>
-			{
-			public:
-				//static RetType runTask(const std::string& name, const Args&... args)
-				//{
-				//	return TaskBase<RetType, Args...>::getTask(name)(args...);
-				//}
-
-				static RetType runTask(const std::string& name, Args... args)
-				{
-					return TaskBase<RetType, Args...>::getTask(name)(forward<Args>(args)...);
-				}
-
-				//template<typename LocalRetType>
-				//static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal, const Args&... args)
-				//{
-				//	try { retVal = TaskBase<RetType, Args...>::getTask(name)(args...); }
-				//	catch (...) { return false; }
-
-				//	return true;
-				//}
-
-				template<typename LocalRetType>
-				static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal, Args... args)
-				{
-					try { retVal = TaskBase<RetType, Args...>::getTask(name)(forward<Args>(args)...); }
-					catch (...) { return false; }
-
-					return true;
-				}
-
-				//static bool runTaskNoThrow(const std::string& name, const Args&... args) //This version is called for return type 'void' or if someone is not interested in the return value
-				//{
-				//	try { TaskBase<RetType, Args...>::getTask(name)(args...); }
-				//	catch (...) { return false; }
-
-				//	return true;
-				//}
-
-				static bool runTaskNoThrow(const std::string& name, Args... args) //This version is called for return type 'void' or if someone is not interested in the return value
-				{
-					try { TaskBase<RetType, Args...>::getTask(name)(forward<Args>(args)...); }
-					catch (...) { return false; }
-
-					return true;
-				}
-			};
-
-			//Specialization for zero arguments
-			//template<typename RetType>
-			//class Task<RetType> : public TaskBase<RetType>
-			//{
-			//public:
-			//	static RetType runTask(const std::string& name)
-			//	{
-			//		return TaskBase<RetType>::getTask(name)();
-			//	}
-
-			//	template<typename LocalRetType>
-			//	static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal)
-			//	{
-			//		try { retVal = TaskBase<RetType>::getTask(name)(); }
-			//		catch (...) { return false; }
-
-			//		return true;
-			//	}
-
-			//	static bool runTaskNoThrow(const std::string& name) //This version is called for return type 'void' or if someone is not interested in the return value
-			//	{
-			//		try { TaskBase<RetType>::getTask(name)(); }
-			//		catch (...) { return false; }
-
-			//		return true;
-			//	}
-
-			//};
 
 		};
 
