@@ -10,7 +10,7 @@
 #include <sstream>
 
 #include "MM_UnitTestFramework/MM_UnitTestFramework.h"
-#include "TMP_CustomTaskExecutor.h"
+#include "TMP_CustomTaskExecutor_v1to4.h"
 
 namespace mm {
 

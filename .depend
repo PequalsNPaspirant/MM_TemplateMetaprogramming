@@ -15,9 +15,9 @@ obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_tuple.o: src/Tem
 
 obj/windows_gcc/TemplateMetaprogramming/TemplateMetaProgramming_using.o: src/TemplateMetaprogramming/TemplateMetaProgramming_using.cpp
 
-obj/windows_gcc/TemplateMetaprogramming/TMP_CustomTaskExecutor.o: src/TemplateMetaprogramming/TMP_CustomTaskExecutor.cpp \
+obj/windows_gcc/TemplateMetaprogramming/TMP_CustomTaskExecutor_v1to4.o: src/TemplateMetaprogramming/TMP_CustomTaskExecutor_v1to4.cpp \
  src/MM_UnitTestFramework/MM_UnitTestFramework.h \
- src/TemplateMetaprogramming/TMP_CustomTaskExecutor.h
+ src/TemplateMetaprogramming/TMP_CustomTaskExecutor_v1to4.h
 
 obj/windows_gcc/TemplateMetaprogramming/TMP_CustomTaskExecutor_v5.o: src/TemplateMetaprogramming/TMP_CustomTaskExecutor_v5.cpp \
  src/MM_UnitTestFramework/MM_UnitTestFramework.h \
