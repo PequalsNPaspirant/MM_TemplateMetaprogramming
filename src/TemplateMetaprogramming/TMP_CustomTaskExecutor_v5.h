@@ -138,33 +138,33 @@ namespace mm {
 		};
 
 		//Specialization for zero arguments
-		template<typename RetType>
-		class Task<RetType> : public TaskBase<RetType>
-		{
-		public:
-			static RetType runTask(const std::string& name)
-			{
-				return TaskBase<RetType>::getTask(name)();
-			}
+		//template<typename RetType>
+		//class Task<RetType> : public TaskBase<RetType>
+		//{
+		//public:
+		//	static RetType runTask(const std::string& name)
+		//	{
+		//		return TaskBase<RetType>::getTask(name)();
+		//	}
 
-			template<typename LocalRetType>
-			static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal)
-			{
-				try { retVal = TaskBase<RetType>::getTask(name)(); }
-				catch (...) { return false; }
+		//	template<typename LocalRetType>
+		//	static bool runTaskNoThrow(const std::string& name, LocalRetType& retVal)
+		//	{
+		//		try { retVal = TaskBase<RetType>::getTask(name)(); }
+		//		catch (...) { return false; }
 
-				return true;
-			}
+		//		return true;
+		//	}
 
-			static bool runTaskNoThrow(const std::string& name) //This version is called for return type 'void' or if someone is not interested in the return value
-			{
-				try { TaskBase<RetType>::getTask(name)(); }
-				catch (...) { return false; }
+		//	static bool runTaskNoThrow(const std::string& name) //This version is called for return type 'void' or if someone is not interested in the return value
+		//	{
+		//		try { TaskBase<RetType>::getTask(name)(); }
+		//		catch (...) { return false; }
 
-				return true;
-			}
+		//		return true;
+		//	}
 
-		};
+		//};
 	
 	};
 

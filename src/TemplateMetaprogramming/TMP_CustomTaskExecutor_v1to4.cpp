@@ -362,12 +362,12 @@ namespace mm {
 		using TestFunctionStruct3 = TestFunctionStruct<CustomTaskExecutor, std::string, double>;
 		using TestFunctionStruct4 = TestFunctionStruct<CustomTaskExecutor, std::string, const std::string&, double, long long>;
 
-#if defined(_MSC_VER)
+//#if defined(_MSC_VER)
 		incrementInput(); TestFunctionStruct1::testFunction(funName, cStyleFunVoidVoid);
 		incrementInput(); TestFunctionStruct2::testFunction(funName, cStyleFunVoidInt, intIn);
 		incrementInput(); TestFunctionStruct3::testFunction(funName, cStyleFunStringDouble, dIn);
 		incrementInput(); TestFunctionStruct4::testFunction(funName, cStyleFunStringConstRefStringDoubleLonglong, strIn, dIn, llIn);
-#endif
+//#endif
 
 		incrementInput(); TestFunctionStruct1::testFunction(funName, Functor{});
 		incrementInput(); TestFunctionStruct2::testFunction(funName, Functor{}, intIn);
