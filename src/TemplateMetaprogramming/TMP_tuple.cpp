@@ -1,7 +1,7 @@
 
 #include <typeinfo>
 
-#include <TemplateMetaprogramming/TemplateMetaProgramming_tuple.h>
+#include <TemplateMetaprogramming/TMP_tuple.h>
 #include "MM_UnitTestFramework/MM_UnitTestFramework.h"
 
 namespace mm {

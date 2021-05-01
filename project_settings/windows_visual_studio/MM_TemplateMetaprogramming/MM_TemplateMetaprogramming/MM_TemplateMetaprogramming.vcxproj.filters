@@ -15,28 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\Templates\Templates.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_basics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_tuple.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_forward.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_using.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\_MM_TemplateMetaprogramming_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\MM_Any.cpp">
@@ -51,17 +33,26 @@
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v6.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\FunctionTemplatesSpecialization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_forward.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_tuple.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_using.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_basics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\..\%40_Programming\Everything\MM_TemplateMetaprogramming\src\_MM_TemplateMetaprogramming_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\src\Templates\Templates.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_basics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_tuple.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -78,6 +69,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v6.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_tuple.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_basics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -19,29 +19,28 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\_MM_TemplateMetaprogramming_main.cpp" />
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\FunctionTemplatesSpecialization.cpp" />
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_basics.cpp" />
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_forward.cpp" />
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_tuple.cpp" />
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_using.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v6.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v5.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\MM_Any.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v1to4.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.cpp" />
-    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_forward.cpp" />
-    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_using.cpp" />
-    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_tuple.cpp" />
-    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_basics.cpp" />
-    <ClCompile Include="..\..\..\..\src\Templates\Templates.cpp" />
-    <ClCompile Include="..\..\..\..\src\_MM_TemplateMetaprogramming_main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_basics.h" />
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_tuple.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v6.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v5.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\MM_Any.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CustomTaskExecutor_v1to4.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_type_traits.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.h" />
-    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_tuple.h" />
-    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TemplateMetaProgramming_basics.h" />
-    <ClInclude Include="..\..\..\..\src\Templates\Templates.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{80B97CE0-EBC7-4439-811E-E3336B5D0DA9}</ProjectGuid>

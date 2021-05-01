@@ -5,7 +5,7 @@
 #include <cstdint>
 using namespace std;
 
-#include <TemplateMetaprogramming/TemplateMetaProgramming_basics.h>
+#include <TemplateMetaprogramming/TMP_basics.h>
 #include "MM_UnitTestFramework/MM_UnitTestFramework.h"
 
 /*
