@@ -48,7 +48,13 @@
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_basics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\%40_Programming\Everything\MM_TemplateMetaprogramming\src\_MM_TemplateMetaprogramming_main.cpp">
+    <ClCompile Include="..\..\..\..\src\_MM_TemplateMetaprogramming_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CompileTimeStringHash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_ConstexprBitsArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -75,6 +81,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_basics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CompileTimeStringHash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_ConstexprBitsArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

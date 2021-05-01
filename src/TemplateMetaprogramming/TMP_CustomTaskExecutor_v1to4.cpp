@@ -393,9 +393,9 @@ namespace mm {
 		testCustomTaskExecutor_v2v4<CustomTaskExecutor_v4::Task>();
 	}
 
-	MM_DECLARE_FLAG(TemplateMetaProgrammingCustomTaskExecutor_v1);
+	MM_DECLARE_FLAG(TemplateMetaProgrammingCustomTaskExecutor_v1to4);
 
-	MM_UNIT_TEST(TemplateMetaProgrammingCustomTaskExecutorTest_v1, TemplateMetaProgrammingCustomTaskExecutor_v1)
+	MM_UNIT_TEST(TemplateMetaProgrammingCustomTaskExecutorTest_v1to4, TemplateMetaProgrammingCustomTaskExecutor_v1to4)
 	{
 		testAllCustomTaskExecutorVersions();
 	}

@@ -9,6 +9,14 @@ obj/windows_gcc/TemplateMetaprogramming/TMP_basics.o: src/TemplateMetaprogrammin
  src/TemplateMetaprogramming/TMP_basics.h \
  src/MM_UnitTestFramework/MM_UnitTestFramework.h
 
+obj/windows_gcc/TemplateMetaprogramming/TMP_CompileTimeStringHash.o: src/TemplateMetaprogramming/TMP_CompileTimeStringHash.cpp \
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h \
+ src/TemplateMetaprogramming/TMP_CompileTimeStringHash.h
+
+obj/windows_gcc/TemplateMetaprogramming/TMP_ConstexprBitsArray.o: src/TemplateMetaprogramming/TMP_ConstexprBitsArray.cpp \
+ src/MM_UnitTestFramework/MM_UnitTestFramework.h \
+ src/TemplateMetaprogramming/TMP_ConstexprBitsArray.h
+
 obj/windows_gcc/TemplateMetaprogramming/TMP_CustomTaskExecutor_v1to4.o: src/TemplateMetaprogramming/TMP_CustomTaskExecutor_v1to4.cpp \
  src/MM_UnitTestFramework/MM_UnitTestFramework.h \
  src/TemplateMetaprogramming/TMP_CustomTaskExecutor_v1to4.h

@@ -14,9 +14,11 @@ namespace mm {
 	MM_DEFINE_FLAG(false, TMP_unique_ptr_polymorphism);
 	MM_DEFINE_FLAG(false, MM_Any_type);
 	MM_DEFINE_FLAG(false, MM_returnTypeCovariance);
-	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v1);
+	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v1to4);
 	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v5);
-	MM_DEFINE_FLAG(true, TemplateMetaProgrammingCustomTaskExecutor_v6);
+	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v6);
+	MM_DEFINE_FLAG(true, compileTimeStringHash_v1);
+	MM_DEFINE_FLAG(true, constexprBitsArray_v1);
 }
 
 int main(int argc, char* argv[])
