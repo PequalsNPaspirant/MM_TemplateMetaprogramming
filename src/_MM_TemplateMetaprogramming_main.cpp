@@ -17,7 +17,7 @@ namespace mm {
 	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v1to4);
 	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v5);
 	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v6);
-	MM_DEFINE_FLAG(true, compileTimeStringHash_v1);
+	MM_DEFINE_FLAG(false, compileTimeStringHash_v1);
 	MM_DEFINE_FLAG(true, constexprBitsArray_v1);
 }
 
