@@ -18,17 +18,17 @@ namespace mm {
 
 		void test()
 		{
-			constexprBitsArray<size_t, 68> bits100(true);
+			constexprBitsArray<size_t, 100> bits100(true);
 			//bits100.setAllBits(true);
 
 			size_t e1 = bits100.getAt<0>();
 			MM_EXPECT_TRUE(e1 == 0b1111111111111111111111111111111111111111111111111111111111111111, e1);
 			size_t e2 = bits100.getAt<1>();
-			MM_EXPECT_TRUE(e2 == 0b1111000000000000000000000000000000000000000000000000000000000000, e2);
+			MM_EXPECT_TRUE(e2 == 0b1111111111111111111111111111111111110000000000000000000000000000, e2);
 			
 			bool flag1 = bits100.getBit(0);
 			MM_EXPECT_TRUE(flag1 == true, flag1);
-			bool flag2 = bits100.getBit(65);
+			bool flag2 = bits100.getBit(99);
 			MM_EXPECT_TRUE(flag2 == true, flag2);
 
 			constexprBitsArray<size_t, 90> bits90;
