@@ -26,6 +26,7 @@ namespace mm {
 			//	: data_{ 0 }
 			//{}
 			constexpr constexprBitsArray(bool flag = false)
+				: data_{ 0 }
 			{
 				//setAllBits(flag);
 				data_[numElements_ - 1] = (flag ? ~((T{1} << (bitsInOneElement_ - bitsInLastElement_)) - T{1}) : T{0});
@@ -53,7 +54,7 @@ namespace mm {
 					data_[arrayIndex] &= ~(1ULL << (constexprBitsArray<T, bits_>::bitsInOneElement_ - bitIndex - 1)); //bit index 0 starts at left
 			}
 
-			bool getBit(size_t index) const
+			constexpr bool getBit(size_t index) const
 			{
 				size_t arrayIndex = index / constexprBitsArray<T, bits_>::bitsInOneElement_;
 				size_t bitIndex = index % constexprBitsArray<T, bits_>::bitsInOneElement_;
@@ -70,7 +71,7 @@ namespace mm {
 			}
 			
 			template<size_t index>
-			constexpr T getAt()
+			constexpr T getAt() const
 			{
 				return data_[index];
 			}
