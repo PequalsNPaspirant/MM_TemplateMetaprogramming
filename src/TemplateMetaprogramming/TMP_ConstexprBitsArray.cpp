@@ -21,14 +21,21 @@ namespace mm {
 			constexpr constexprBitsArray<size_t, 100> bits100(true);
 
 			constexpr size_t e1 = bits100.getAt<0>();
+			static_assert(e1 == 0b1111111111111111111111111111111111111111111111111111111111111111, "Unexpected initialization of object");
 			MM_EXPECT_TRUE(e1 == 0b1111111111111111111111111111111111111111111111111111111111111111, e1);
 			constexpr size_t e2 = bits100.getAt<1>();
+			static_assert(e2 == 0b1111111111111111111111111111111111110000000000000000000000000000, "Unexpected initialization of object");
 			MM_EXPECT_TRUE(e2 == 0b1111111111111111111111111111111111110000000000000000000000000000, e2);
-			
+			//constexpr size_t e3 = bits100.getAt<2>(); //fails to compile: error: array subscript value ‘2’ is outside the bounds of array type ‘long unsigned int [2]’
+
 			constexpr bool flag1 = bits100.getBit(0);
+			static_assert(flag1 == true, "Unexpected initialization of object");
 			MM_EXPECT_TRUE(flag1 == true, flag1);
 			constexpr bool flag2 = bits100.getBit(99);
+			static_assert(flag2 == true, "Unexpected initialization of object");
 			MM_EXPECT_TRUE(flag2 == true, flag2);
+			constexpr bool flag3 = bits100.getBit(100); //does not fail to compile because the bitIndex upto 128 is valid and is initialized for this object
+			//constexpr bool flag4 = bits100.getBit(129); //fails to compile  error: array subscript value ‘2’ is outside the bounds of array type ‘long unsigned int [2]’
 
 			constexpr constexprBitsArray<size_t, 90> bits90;
 
