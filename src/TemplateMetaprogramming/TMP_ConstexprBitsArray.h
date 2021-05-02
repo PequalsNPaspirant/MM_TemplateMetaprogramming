@@ -22,27 +22,24 @@ namespace mm {
 		public:
 			using type = T;
 
-			//constexpr constexprBitsArray()
-			//	: data_{ 0 }
-			//{}
 			constexpr constexprBitsArray(bool flag = false)
 				: data_{ 0 }
 			{
-				//setAllBits(flag);
 				data_[numElements_ - 1] = (flag ? ~((T{1} << (bitsInOneElement_ - bitsInLastElement_)) - T{1}) : T{0});
 				for(size_t i = 0; i < numElements_ - 1; ++i)
 					data_[i] = (flag ? ~(T{0}) : T{0});
 			}
+			
+			//constexpr constexprBitsArray(bool flag = false)
+			//	: data_{ 0 }
+			//{
+			//	setValueAtIndex<numElements_ - 1>(flag, (flag ? ~((T{1} << (bitsInOneElement_ - bitsInLastElement_)) - T{1}) : T{0}));
+			//}
 
 			constexpr size_t size() const
 			{
 				return bits_;
 			}
-
-			//constexpr void setAllBits(bool flag)
-			//{
-			//	setAllBitsHelper<numElements_ - 1>(flag);
-			//}
 
 			void setBit(size_t index, bool value)
 			{
@@ -84,47 +81,20 @@ namespace mm {
 
 			T data_[numElements_];
 
-			template<size_t index, std::enable_if_t<index != 0>* dummyT = nullptr>
-			constexpr constexprBitsArray<T, bits_>& setAllBitsHelper(bool flag)
-			{
-				constexpr size_t remainintBits = bits_ % bitsInOneElement_;
-				return setValueAtIndex<index>(
-					(index != (numElements_ - 1) || remainintBits == 0)
-						? std::numeric_limits<T>::max()
-						: ~((1ULL << (bitsInOneElement_ - remainintBits)) - 1ULL)
-					).setAllBitsHelper<index - 1>(flag);
-			}
+			//template<size_t index, std::enable_if_t<index != 0>* dummyT = nullptr>
+			//constexpr void setValueAtIndex(bool flag, T value)
+			//{
+			//	data_[index] = value;
+			//	setValueAtIndex<index - 1>(flag, flag ? ~(T{0}) : T{0});
+			//}
+			//
+			//template<size_t index, std::enable_if_t<index == 0>* dummyT = nullptr>
+			//constexpr void setValueAtIndex(bool flag, T value)
+			//{
+			//	data_[0] = value;
+			//}
 
-			template<size_t index, std::enable_if_t<index == 0>* dummyT = nullptr>
-			constexpr constexprBitsArray<T, bits_>& setAllBitsHelper(bool flag)
-			{
-				return setValueAtIndex<0>(flag ? std::numeric_limits<T>::max() : T{0});
-			}
-
-			template<size_t index>
-			constexpr constexprBitsArray<T, bits_>& setValueAtIndex(T value)
-			{
-				data_[index] = value;
-				return *this;
-			}
 		};
-		
-		//template<typename T, size_t bits_, size_t index>
-		//constexpr constexprBitsArray<T, bits_>& constexprBitsArray<T, bits_>::setAllBitsHelper(bool flag)
-		//{
-		//	constexpr size_t remainintBits = bits_ % bitsInOneElement_;
-		//	return setValueAtIndex<index>(
-		//		index != (numElements_ - 1) || remainintBits == 0
-		//			? std::numeric_limits<T>::max()
-		//			: ~((1ULL << (bitsInOneElement_ - remainintBits)) - 1ULL)
-		//		).setAllBitsHelper<index - 1>(flag);
-		//}
-		//	
-		//template<typename T, size_t bits_>
-		//constexpr constexprBitsArray<T, bits_>& constexprBitsArray<T, bits_>::setAllBitsHelper<0>(bool flag)
-		//{
-		//	return setValueAtIndex<0>(flag);
-		//}
 
 	}
 
