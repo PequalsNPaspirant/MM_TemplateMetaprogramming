@@ -16,7 +16,6 @@ namespace mm {
 
 	namespace constexprBitsArray_v1 {
 
-
 		void test()
 		{
 
