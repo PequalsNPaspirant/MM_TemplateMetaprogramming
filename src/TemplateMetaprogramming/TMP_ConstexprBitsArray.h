@@ -51,12 +51,21 @@ namespace mm {
 					data_[arrayIndex] &= ~(1ULL << (constexprBitsArray<T, bits_>::bitsInOneElement_ - bitIndex - 1)); //bit index 0 starts at left
 			}
 
-			constexpr bool getBit(size_t index) const
+			template<size_t index, std::enable_if_t<(index < bits_)>* d = nullptr>
+			constexpr bool getBitConstexpr() const
 			{
-				//can not throw in constexpr function
-				//if(index >= bits_)
-				//	throw std::range_error{ "Index " + std::to_string(index) + " should be less than bits_ " + std::to_string(bits_) };
+				//using DummyType = std::enable_if_t<(index < bits_)>;
 					
+				size_t arrayIndex = index / constexprBitsArray<T, bits_>::bitsInOneElement_;
+				size_t bitIndex = index % constexprBitsArray<T, bits_>::bitsInOneElement_;
+				return data_[arrayIndex] & (1ULL << (constexprBitsArray<T, bits_>::bitsInOneElement_ - bitIndex - 1)); //bit index 0 starts at left
+			}
+
+			bool getBit(size_t index) const
+			{
+				if(index >= bits_)
+					throw std::range_error{ "Index " + std::to_string(index) + " should be less than bits_ " + std::to_string(bits_) };
+
 				size_t arrayIndex = index / constexprBitsArray<T, bits_>::bitsInOneElement_;
 				size_t bitIndex = index % constexprBitsArray<T, bits_>::bitsInOneElement_;
 				return data_[arrayIndex] & (1ULL << (constexprBitsArray<T, bits_>::bitsInOneElement_ - bitIndex - 1)); //bit index 0 starts at left

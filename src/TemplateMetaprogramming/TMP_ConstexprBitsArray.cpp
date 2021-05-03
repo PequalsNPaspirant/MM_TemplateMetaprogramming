@@ -28,27 +28,36 @@ namespace mm {
 			MM_EXPECT_TRUE(e2 == 0b1111111111111111111111111111111111110000000000000000000000000000, e2);
 			//constexpr size_t e3 = bits100.getAt<2>(); //fails to compile: error: array subscript value ‘2’ is outside the bounds of array type ‘long unsigned int [2]’
 
-			constexpr bool flag1 = bits100.getBit(0);
+			constexpr bool flag1 = bits100.getBitConstexpr<0>();
 			static_assert(flag1 == true, "Unexpected initialization of object");
 			MM_EXPECT_TRUE(flag1 == true, flag1);
-			constexpr bool flag2 = bits100.getBit(99);
+			constexpr bool flag2 = bits100.getBitConstexpr<99>();
 			static_assert(flag2 == true, "Unexpected initialization of object");
 			MM_EXPECT_TRUE(flag2 == true, flag2);
 			
-			constexpr bool flag3 = bits100.getBit(100); //does not fail to compile because the bitIndex upto 128 is valid and is initialized for this object
+			//constexpr bool flag3 = bits100.getBitConstexpr<100>(); //error C2672: 'mm::constexprBitsArray_v1::constexprBitsArray<size_t,100,0x0>::getBitConstexpr': no matching overloaded function found
 			//constexpr bool flag4 = bits100.getBit(129); //fails to compile  error: array subscript value ‘2’ is outside the bounds of array type ‘long unsigned int [2]’
 			//bool flag4 = bits100.toggleBit(5); //note: Conversion loses qualifiers     error C2662: 'bool mm::constexprBitsArray_v1::constexprBitsArray<size_t,100,0x0>::toggleBit(size_t)': cannot convert 'this' pointer from 'const mm::constexprBitsArray_v1::constexprBitsArray<size_t,100,0x0>' to 'mm::constexprBitsArray_v1::constexprBitsArray<size_t,100,0x0> &'
 			
 			constexpr constexprBitsArray<size_t, 90> bits90; //initializes at compile time to all flags = false
 
 			constexprBitsArray<size_t, 80> bits80(true);
-			bool flag5 = bits100.getBit(5);
+			bool flag5 = bits80.getBit(5);
 			MM_EXPECT_TRUE(flag5 == true, flag5);
 			bool flag6 = bits80.toggleBit(5);
 			MM_EXPECT_TRUE(flag6 == false, flag5);
 			bits80.setBit(5, true);
-			bool flag7 = bits100.getBit(5);
+			bool flag7 = bits80.getBit(5);
 			MM_EXPECT_TRUE(flag7 == true, flag7);
+			bool exception = false;
+			try {
+				bool flag8 = bits80.getBit(81); //throws
+			}
+			catch (...)
+			{
+				exception = true;
+			}
+			MM_EXPECT_TRUE(exception == true, exception);
 			
 			//constexpr constexprBitsArray<int, 90> bits80(true); //fails to compile since the type is not unsigned
 		}
