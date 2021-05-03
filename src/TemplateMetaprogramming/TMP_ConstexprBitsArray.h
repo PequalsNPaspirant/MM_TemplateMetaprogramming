@@ -30,6 +30,7 @@ namespace mm {
 					data_[i] = (flag ? ~(T{0}) : T{0});
 			}
 			
+			//below constructor can be used for older compiler versions
 			//constexpr constexprBitsArray(bool flag = false)
 			//	: data_{ 0 }
 			//{
@@ -54,8 +55,6 @@ namespace mm {
 			template<size_t index, std::enable_if_t<(index < bits_)>* d = nullptr>
 			constexpr bool getBitConstexpr() const
 			{
-				//using DummyType = std::enable_if_t<(index < bits_)>;
-					
 				size_t arrayIndex = index / constexprBitsArray<T, bits_>::bitsInOneElement_;
 				size_t bitIndex = index % constexprBitsArray<T, bits_>::bitsInOneElement_;
 				return data_[arrayIndex] & (1ULL << (constexprBitsArray<T, bits_>::bitsInOneElement_ - bitIndex - 1)); //bit index 0 starts at left
