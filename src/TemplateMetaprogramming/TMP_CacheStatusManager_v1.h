@@ -107,6 +107,38 @@ namespace mm {
 			CacheStatusManager(CacheType& cache) : cache_{ cache } {}
 			~CacheStatusManager() = default;
 
+			template<typename Fun, typename... Args>
+			ValueType setOrGet(const KeyType& key, int numRetries, bool wait, size_t timeoutMilliSec, Fun funToCreateValue, Args... args)
+			{
+				ValueType value;
+				for (int tries = 0; !value && tries < numRetries; ++tries) //if this thread timed out, try again for numRetries times
+				{
+					log("INFO", "CacheStatusManager: setOrGet: tries: ", tries);
+					WriteAccess wa = getWriteAccess(key);
+					if (wa.accessGranted())
+					{
+						value = funToCreateValue(forward<Args>(args)...); //this function may throw
+						wa.set(value);
+					}
+					else //wait for cache to be updated
+						value = get(key, wait, timeoutMilliSec);
+				}
+
+				return value;
+			}
+
+			void clear()
+			{
+				log("INFO", "CacheStatusManager: clear: ");
+				std::unique_lock<std::mutex> lock{ muStatus_ };
+				cacheStatus_.clear();
+				lock.unlock();
+
+				cache_.clear();
+
+				cvStatus_.notify_all(); //in case any thread is still waiting on cv. (THIS SHOULD NOT HAPPEN)
+			}
+
 		private:
 			//No syncronization is required for this class
 			class WriteAccess
@@ -156,40 +188,6 @@ namespace mm {
 				bool accessGranted_{ false };
 			};
 
-		public:
-			template<typename Fun, typename... Args>
-			ValueType setOrGet(const KeyType& key, int numRetries, bool wait, size_t timeoutMilliSec, Fun funToCreateValue, Args... args)
-			{
-				ValueType value;
-				for (int tries = 0; !value && tries < numRetries; ++tries) //if this thread timed out, try again for numRetries times
-				{
-					log("INFO", "CacheStatusManager: setOrGet: tries: ", tries);
-					WriteAccess wa = getWriteAccess(key);
-					if (wa.accessGranted())
-					{
-						value = funToCreateValue(forward<Args>(args)...); //this function may throw
-						wa.set(value);
-					}
-					else //wait for cache to be updated
-						value = get(key, wait, timeoutMilliSec);
-				}
-
-				return value;
-			}
-
-			void clear()
-			{
-				log("INFO", "CacheStatusManager: clear: ");
-				std::unique_lock<std::mutex> lock{ muStatus_ };
-				cacheStatus_.clear();
-				lock.unlock();
-
-				cache_.clear();
-
-				cvStatus_.notify_all(); //in case any thread is still waiting on cv. (THIS SHOULD NOT HAPPEN)
-			}
-
-		private:
 			WriteAccess getWriteAccess(const KeyType& key)
 			{
 				std::unique_lock<std::mutex> lock{ muStatus_ };
