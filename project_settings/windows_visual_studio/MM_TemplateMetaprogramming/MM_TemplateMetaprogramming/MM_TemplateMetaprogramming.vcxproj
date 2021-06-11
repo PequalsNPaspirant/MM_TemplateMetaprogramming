@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CacheStatusManager_v1.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_ConstexprBitsArray.cpp" />
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CompileTimeStringHash.cpp" />
     <ClCompile Include="..\..\..\..\src\_MM_TemplateMetaprogramming_main.cpp" />
@@ -35,6 +36,7 @@
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CacheStatusManager_v1.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_ConstexprBitsArray.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CompileTimeStringHash.h" />
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_basics.h" />

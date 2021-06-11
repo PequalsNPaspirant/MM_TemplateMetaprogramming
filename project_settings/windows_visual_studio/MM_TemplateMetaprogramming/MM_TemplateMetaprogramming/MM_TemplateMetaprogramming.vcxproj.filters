@@ -57,6 +57,9 @@
     <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_ConstexprBitsArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CacheStatusManager_v1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_unique_ptr_polymorphism.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_ConstexprBitsArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\TemplateMetaprogramming\TMP_CacheStatusManager_v1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
