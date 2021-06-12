@@ -96,7 +96,7 @@ namespace mm {
 						std::this_thread::sleep_for(std::chrono::milliseconds{ currentTimeout }); break;
 					case 8:
 						//randomly delay to make other threads time out. Probability = 1/10
-						//std::this_thread::sleep_for(std::chrono::milliseconds{ timeoutMilliSec + 50 }); break;
+						std::this_thread::sleep_for(std::chrono::milliseconds{ timeoutMilliSec + 50 }); break;
 					case 9:
 						//randomly throw. Probability = 1/10
 						throw std::runtime_error{ "destructive testing: throwing intentionally" }; break;
