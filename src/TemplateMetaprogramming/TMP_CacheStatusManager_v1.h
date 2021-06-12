@@ -124,7 +124,7 @@ namespace mm {
 				ValueType value;
 				for (int tries = 0; !value && tries < numRetries; ++tries) //if this thread timed out, try again for numRetries times
 				{
-					log("INFO", "CacheStatusManager: setOrGet: tries: ", tries);
+					log("DEBG", "CacheStatusManager: setOrGet: tries: ", tries);
 					WriteAccess wa = getWriteAccess(key);
 					if (wa.accessGranted())
 					{
@@ -147,26 +147,18 @@ namespace mm {
 				std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 				while (status == CacheStatus::preparing)
 				{
-					if (!wait)
-						return nullptr;
+					if (!wait) return nullptr;
 
 					log("INFO", "CacheStatusManager: get: waiting: key: ", key);
-
 					std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 					std::chrono::milliseconds elaspedTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 					std::chrono::milliseconds remainingTimeout = std::chrono::milliseconds{ timeoutMilliSec } -elaspedTime;
 					if (remainingTimeout.count() <= 0 || cvStatus_.wait_for(lock, remainingTimeout) == std::cv_status::timeout)
 					{
+						//The thread which was preparing data could not finish within time limit, reason may be exception, infinite loop etc.
 						log("CRIT", "CacheStatusManager: get: timed out: key: ", key);
-						if (status != CacheStatus::available) //If no other thread has yet pushed data in cache
-						{
-							status = CacheStatus::unavailable;
-							lock.unlock();
-							//The thread which was preparing data could not finish within time limit, reason may be exception, infinite loop etc.
-							//So, notify all waiting threads to be on safer side.
-							cvStatus_.notify_all();
-							return nullptr;
-						}
+						resetStatusIfStillPreparing(key);
+						return nullptr;
 					}
 				}
 
@@ -199,18 +191,18 @@ namespace mm {
 					accessGranted_{ accessGranted }
 				{}
 
-				~WriteAccess()
-				{
-					if (accessGranted_)
-						cacheStatusMgr_.resetStatusIfStillPreparing(key_);
-				}
-
 				//Do not allow copy
 				WriteAccess(const WriteAccess&) = delete;
 				WriteAccess& operator=(const WriteAccess&) = delete;
 				//Allow move
 				WriteAccess(WriteAccess&&) = default;
 				WriteAccess& operator=(WriteAccess&&) = default;
+
+				~WriteAccess()
+				{
+					if (accessGranted_)
+						cacheStatusMgr_.resetStatusIfStillPreparing(key_);
+				}
 
 				void set(ValueType value)
 				{
@@ -264,10 +256,10 @@ namespace mm {
 				CacheStatus& status = cacheStatus_[key];
 				if (status == CacheStatus::preparing)
 				{
-					//If the status is still not 'available', probably there was exception in data preparing function, 
-					//status may be still 'preparing', change the status and notify all threads
+					//If the status is still not 'available', probably due to exception or infinite loop etc in data preparing function,
+					//and status may be still 'preparing', so reset the status and notify all threads
 					//If the status is not 'preparing', some other thread might have timed out and changed status
-					log("CRIT", "WriteAccess: ~WriteAccess: resetStatusIfStillPreparing: data is still not cached");
+					log("CRIT", "CacheStatusManager: resetStatusIfStillPreparing: data is still not cached");
 
 					status = CacheStatus::unavailable;
 					lock.unlock();
