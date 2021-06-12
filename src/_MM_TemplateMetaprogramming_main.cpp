@@ -19,7 +19,6 @@ namespace mm {
 	MM_DEFINE_FLAG(false, TemplateMetaProgrammingCustomTaskExecutor_v6);
 	MM_DEFINE_FLAG(false, compileTimeStringHash_v1);
 	MM_DEFINE_FLAG(false, constexprBitsArray_v1);
-	MM_DEFINE_FLAG(true, TMPCacheStatusManager_v1);
 }
 
 int main(int argc, char* argv[])
