@@ -157,8 +157,14 @@ namespace mm {
 					{
 						//The thread which was preparing data could not finish within time limit, reason may be exception, infinite loop etc.
 						log("CRIT", "CacheStatusManager: get: timed out: key: ", key);
-						resetStatusIfStillPreparing(key);
-						return nullptr;
+						if (status != CacheStatus::available) //If no other thread has yet pushed data in cache
+						{
+							status = CacheStatus::unavailable;
+							lock.unlock();
+							cvStatus_.notify_all();
+							return nullptr;
+						}
+
 					}
 				}
 
@@ -245,9 +251,10 @@ namespace mm {
 				std::unique_lock<std::mutex> lock{ muStatus_ };
 				CacheStatus& status = cacheStatus_[key];
 				status = CacheStatus::available;
+				cache_.set(key, value); //update the cache under cacheStatus lock
+				lock.unlock();
 
-				//update the cache under cacheStatus lock
-				cache_.set(key, value);
+				cvStatus_.notify_all();
 			}
 
 			void resetStatusIfStillPreparing(const KeyType& key)
