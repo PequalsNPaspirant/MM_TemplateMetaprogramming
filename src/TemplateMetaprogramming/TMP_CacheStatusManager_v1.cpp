@@ -23,6 +23,8 @@ namespace mm {
 			MyKey(int val) : val_{ val } {}
 			MyKey(const MyKey&) = default;
 			MyKey(MyKey&&) = default;
+			MyKey& operator=(const MyKey&) = default;
+			MyKey& operator=(MyKey&&) = default;
 
 			size_t hash() const override
 			{
@@ -62,35 +64,50 @@ namespace mm {
 			int val_;
 		};
 
-		void testCacheStatusManager()
+		void testCacheStatusManager(bool generateRandomKey)
 		{
+			bool ready = false;
+			std::mutex mu;
+			std::condition_variable cv;
+
 			using CacheType = Cache<MyKey, std::shared_ptr<MyValue>, Hash<MyKey>>;
 			using CacheStatusMgrType = CacheStatusManager<CacheType, MyKey, std::shared_ptr<MyValue>, Hash<MyKey>>;
-			auto threadFunction = [](CacheStatusMgrType& cacheStatusMgr, int numIterations, size_t timeoutMilliSec) {
+			auto threadFunction = [&](CacheStatusMgrType& cacheStatusMgr, int numIterations, size_t timeoutMilliSec) {
 
 				std::random_device rd;
 				std::mt19937 mt(rd());
 				std::uniform_int_distribution<int> distKey(1, numIterations);
 				std::uniform_int_distribution<size_t> distTimeout(1, timeoutMilliSec / 2);
+				std::uniform_int_distribution<int> distBehavior(1, 100);
 
-				auto prepareDataToCache = [timeoutMilliSec](int val, size_t currentTimeout) {
+				auto prepareDataToCache = [timeoutMilliSec](int val, size_t currentTimeout, int behavior) {
 
-					//randomly delay to make other threads time out
-					if (val % 10 == 0)
-						std::this_thread::sleep_for(std::chrono::milliseconds{ timeoutMilliSec + 50 });
-					else
-						std::this_thread::sleep_for(std::chrono::milliseconds{ currentTimeout });
-
-					//randomly throw
-					if (val % 10 == 1)
-						throw std::runtime_error{ "destructive testing" };
-
-					//very randomly go into infinite loop
-					if (val % 1000 == 0)
+					switch (behavior % 10)
 					{
-						log("CRIT", "============================== Going into infinite loop: key: ", val);
-						while(true)
-							std::this_thread::sleep_for(std::chrono::milliseconds{ currentTimeout });
+					case 0:
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+						//sleep for some time less than timeout. Probability = 8/10
+						std::this_thread::sleep_for(std::chrono::milliseconds{ currentTimeout }); break;
+					case 8:
+						//randomly delay to make other threads time out. Probability = 1/10
+						//std::this_thread::sleep_for(std::chrono::milliseconds{ timeoutMilliSec + 50 }); break;
+					case 9:
+						//randomly throw. Probability = 1/10
+						throw std::runtime_error{ "destructive testing: throwing intentionally" }; break;
+					default:
+						//very randomly go into infinite loop. Probability = 1/100
+						if (behavior == 100)
+						{
+							log("CRIT", "------------------ Going into infinite loop: key: ", val);
+							while (true)
+								std::this_thread::sleep_for(std::chrono::milliseconds{ currentTimeout });
+						}
 					}
 
 					return std::make_shared<MyValue>(val);
@@ -99,18 +116,34 @@ namespace mm {
 				int numRetries = 3;
 				bool wait = true;
 
+				//Wait for all threads to be created
+				std::unique_lock<std::mutex> lock{ mu };
+				while (!ready)
+					cv.wait(lock);
+				lock.unlock();
+
 				for (int iter = 0; iter < numIterations; ++iter)
 				{
 					//generate random key
-					MyKey key{ distKey(mt) };
+					MyKey key{ -1 };
+					if(generateRandomKey)
+						key = MyKey{ distKey(mt) };
+					else
+						key = MyKey{ iter };
 					size_t currentTimeout{ distTimeout(mt) };
+					int behavior{ distBehavior(mt) };
 					try
 					{
-						std::shared_ptr<MyValue> val = cacheStatusMgr.setOrGet(key, numRetries, wait, timeoutMilliSec, prepareDataToCache, key.val_, currentTimeout);
+						std::shared_ptr<MyValue> val;
+						//val = cacheStatusMgr.get(key, false, 0);
+						//if(val)
+						//	log("CRIT", "=======================================================something wrong, value already in cache for key: ", key);
+						val = cacheStatusMgr.setOrGet(key, numRetries, wait, timeoutMilliSec,
+							prepareDataToCache, key.val_, currentTimeout, behavior);
 					}
-					catch (...)
+					catch (std::exception& e)
 					{
-						log("CRIT", "Exception: key: ", key);
+						log("CRIT", "Exception: ", e.what(), " key: ", key);
 					}
 				}
 			};
@@ -126,12 +159,19 @@ namespace mm {
 			for (int i = 0; i < numThreads; ++i)
 				threadPool.push_back(std::thread{ threadFunction, std::ref(cacheMgr), numIterations, timeoutMilliSec });
 
+			std::unique_lock<std::mutex> lock{ mu };
+			ready = true;
+			lock.unlock();
+
+			cv.notify_all();
+
 			for (int i = 0; i < numThreads; ++i)
 				if (threadPool[i].joinable())
 					threadPool[i].join();
 
 			cacheMgr.clear();
 		}
+
 	}
 
 
@@ -139,7 +179,8 @@ namespace mm {
 
 	MM_UNIT_TEST(TMPCacheStatusManager_v1_Test, TMPCacheStatusManager_v1)
 	{
-		cacheStatusManager_v1::testCacheStatusManager();
+		cacheStatusManager_v1::testCacheStatusManager(false);
+		//cacheStatusManager_v1::testCacheStatusManager(true);
 	}
 }
 

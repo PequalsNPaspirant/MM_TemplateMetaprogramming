@@ -45,15 +45,26 @@ namespace mm {
 			return ss.str();
 		}
 
+		// base case
+		void log(std::ostream& out) {}
+
+		template <typename T, typename... Args>
+		void log(std::ostream& out, T&& t, Args&&... args)
+		{
+			out << std::forward<T>(t);
+			log(out, std::forward<Args>(args)...);
+		}
+
 		template<typename... Args>
-		void log(const std::string& level, Args... args)
+		void log(const std::string& level, Args&&... args)
 		{
 			std::stringstream ss;
 			ss << "\n" << level << " [" << getThreadId() << "] ";
-			using expander = int[];
-			(void)expander {
-				0, (void(ss << ',' << std::forward<Args>(args)), 0)...
-			};
+			//using expander = int[];
+			//(void)expander {
+			//	0, (void(ss << ',' << std::forward<Args>(args)), 0)...
+			//};
+			log(ss, std::forward<Args>(args)...);
 
 			std::cout << ss.str();
 		}
@@ -67,7 +78,7 @@ namespace mm {
 		public:
 			void set(const KeyType& key, ValueType value)
 			{
-				log("INFO", "Cache: Setting data in cache: key, value: ", key, value);
+				log("INFO", "Cache: Setting data in cache: key: ", key, " value: ", value);
 				std::unique_lock<std::mutex> lock{ mu_ };
 				cache_[key] = value;
 			}
@@ -127,85 +138,10 @@ namespace mm {
 				return value;
 			}
 
-			void clear()
-			{
-				log("INFO", "CacheStatusManager: clear: ");
-				std::unique_lock<std::mutex> lock{ muStatus_ };
-				cacheStatus_.clear();
-				lock.unlock();
-
-				cache_.clear();
-
-				cvStatus_.notify_all(); //in case any thread is still waiting on cv. (THIS SHOULD NOT HAPPEN)
-			}
-
-		private:
-			//No syncronization is required for this class
-			class WriteAccess
-			{
-			public:
-				WriteAccess(CacheStatusManager& cacheStatusMgr, const KeyType& key, bool accessGranted) :
-					cacheStatusMgr_{ cacheStatusMgr },
-					key_{ key },
-					accessGranted_{ accessGranted }
-				{}
-
-				~WriteAccess()
-				{
-					if (accessGranted_)
-					{
-						//If the status is still not 'available', probably there was exception in data preparing function, 
-						// status may be still 'preparing', change the status and notify all threads
-						//If the status is not 'preparing', some other thread might have timed out and changed status
-						log("CRIT", "WriteAccess: ~WriteAccess: data is still not cached");
-						cacheStatusMgr_.resetStatusIfStillPreparing(key_);
-					}
-				}
-
-				//Do not allow copy
-				WriteAccess(const WriteAccess&) = delete;
-				WriteAccess& operator=(const WriteAccess&) = delete;
-				//Allow move
-				WriteAccess(WriteAccess&&) = default;
-				WriteAccess& operator=(WriteAccess&&) = default;
-
-				void set(ValueType value)
-				{
-					if (!accessGranted_)
-					{
-						//This may happen when the data preparing thread took long time than timeout, so another thread timedout and it changed status
-						log("CRIT", "WriteAccess: set: forcefully setting data in cache: key, value: ", key_, value);
-					}
-
-					cacheStatusMgr_.set(key_, value);
-				}
-
-				bool accessGranted() { return accessGranted_; }
-
-			private:
-				CacheStatusManager& cacheStatusMgr_;
-				KeyType key_;
-				bool accessGranted_{ false };
-			};
-
-			WriteAccess getWriteAccess(const KeyType& key)
-			{
-				std::unique_lock<std::mutex> lock{ muStatus_ };
-
-				CacheStatus& status = cacheStatus_[key];
-				if (status == CacheStatus::unavailable)
-				{
-					log("INFO", "CacheStatusManager: getWriteAccess: access granted: key: ", key);
-					status = CacheStatus::preparing;
-					return WriteAccess{ *this, key, true };
-				}
-				else
-					return WriteAccess{ *this, key, false };
-			}
-
 			ValueType get(const KeyType& key, bool wait, size_t timeoutMilliSec)
 			{
 				std::unique_lock<std::mutex> lock{ muStatus_ };
+				//No other thread deletes the entry from cache, so we can rely on reference to status without searching again and again
 				CacheStatus& status = cacheStatus_[key];
 
 				std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
@@ -234,20 +170,92 @@ namespace mm {
 					}
 				}
 
-				if(status == CacheStatus::available)
+				if (status == CacheStatus::available)
 					return cache_.get(key);
 
 				return nullptr;
 			}
 
+			void clear()
+			{
+				log("INFO", "CacheStatusManager: clear: ");
+				std::unique_lock<std::mutex> lock{ muStatus_ };
+				cacheStatus_.clear();
+				lock.unlock();
+
+				cache_.clear();
+
+				cvStatus_.notify_all(); //in case any thread is still waiting on cv. (THIS SHOULD NOT HAPPEN)
+			}
+
+		private:
+			//No syncronization is required for this class
+			class WriteAccess
+			{
+			public:
+				WriteAccess(CacheStatusManager& cacheStatusMgr, const KeyType& key, bool accessGranted) :
+					cacheStatusMgr_{ cacheStatusMgr },
+					key_{ key },
+					accessGranted_{ accessGranted }
+				{}
+
+				~WriteAccess()
+				{
+					if (accessGranted_)
+						cacheStatusMgr_.resetStatusIfStillPreparing(key_);
+				}
+
+				//Do not allow copy
+				WriteAccess(const WriteAccess&) = delete;
+				WriteAccess& operator=(const WriteAccess&) = delete;
+				//Allow move
+				WriteAccess(WriteAccess&&) = default;
+				WriteAccess& operator=(WriteAccess&&) = default;
+
+				void set(ValueType value)
+				{
+					//if (!accessGranted_)
+					//{
+					//	//This may happen when the data preparing thread took long time than timeout, so another thread timedout and it changed status
+					//  //Update: THIS SHOULD NOT HAPPEN because unless thread has accessGranted(), it can not call set() 
+					//	log("CRIT", "[THIS SHOULD NOT HAPPEN] WriteAccess: set: forcefully setting data in cache: key: ", key_, " value: ", value);
+					//	throw std::runtime_error{ "Trying to set data into cache without write access" };
+					//}
+
+					cacheStatusMgr_.set(key_, value);
+				}
+
+				bool accessGranted() { return accessGranted_; }
+
+			private:
+				CacheStatusManager& cacheStatusMgr_;
+				KeyType key_;
+				bool accessGranted_{ false };
+			};
+
+			WriteAccess getWriteAccess(const KeyType& key)
+			{
+				std::unique_lock<std::mutex> lock{ muStatus_ };
+
+				CacheStatus& status = cacheStatus_[key];
+				if (status == CacheStatus::unavailable)
+				{
+					log("INFO", "CacheStatusManager: getWriteAccess: access granted: key: ", key);
+					status = CacheStatus::preparing;
+					return WriteAccess{ *this, key, true };
+				}
+				else
+					return WriteAccess{ *this, key, false };
+			}
+
 			void set(const KeyType& key, ValueType value)
 			{
-				//update the cache before updating the status
-				cache_.set(key, value);
-
 				std::unique_lock<std::mutex> lock{ muStatus_ };
 				CacheStatus& status = cacheStatus_[key];
 				status = CacheStatus::available;
+
+				//update the cache under cacheStatus lock
+				cache_.set(key, value);
 			}
 
 			void resetStatusIfStillPreparing(const KeyType& key)
@@ -255,7 +263,16 @@ namespace mm {
 				std::unique_lock<std::mutex> lock{ muStatus_ };
 				CacheStatus& status = cacheStatus_[key];
 				if (status == CacheStatus::preparing)
+				{
+					//If the status is still not 'available', probably there was exception in data preparing function, 
+					//status may be still 'preparing', change the status and notify all threads
+					//If the status is not 'preparing', some other thread might have timed out and changed status
+					log("CRIT", "WriteAccess: ~WriteAccess: resetStatusIfStillPreparing: data is still not cached");
+
 					status = CacheStatus::unavailable;
+					lock.unlock();
+					cvStatus_.notify_all();
+				}
 			}
 
 			enum class CacheStatus
